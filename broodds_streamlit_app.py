@@ -117,11 +117,11 @@ def show_results_distribution(df, subheader=""):
     with column_3:
         plot_metric("L", l*100, suffix="%") 
 
-def show_match_sequence(results_df):
+def show_match_sequence(results_df,over_line):
 
     colors = {'W': 'green', 'D': 'yellow', 'L': 'red'}
     results_df['Color'] = [colors[result] for result in results_df['Result']]
-    results_df['Over'] = results_df['TotalGoals_>2'] 
+    results_df['Over'] = results_df[f'TotalGoals_>{over_line}'] 
     results_df['Both teams score'] = results_df['GF_>0 & GA_>0']
 
     column_1, column_2, column_3= st.columns(3)
@@ -260,7 +260,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data)
+        show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -273,7 +273,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data)
+        show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -304,7 +304,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data)
+        show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -321,7 +321,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data)
+        show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -332,7 +332,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_season_data)
+        show_match_sequence(last_season_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -343,7 +343,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_season_venue_data)
+        show_match_sequence(last_season_venue_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -363,7 +363,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data)
+        show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -376,7 +376,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data)
+        show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -387,7 +387,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_season_data)
+        show_match_sequence(last_season_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -398,7 +398,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_season_venue_data)
+        show_match_sequence(last_season_venue_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
