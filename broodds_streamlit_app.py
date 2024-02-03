@@ -32,6 +32,27 @@ name_mapping = {
 inverse_name_mapping = {v: k for k, v in name_mapping.items()}
 
 
+def plot_pie_chart(results_dict, colors, title=None):
+    # Create a dark background
+    # Color mapping for each result type
+    
+    # Create a pie chart
+    labels = list(results_dict.keys())
+    sizes = list(results_dict.values())
+
+    fig, ax = plt.subplots()
+
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=[colors[result] for result in labels],
+            wedgeprops={'edgecolor': 'white'},  # White edge color
+        textprops={'color': 'white', 'size':15}); # White text color
+
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    ax.legend(labels)
+    # Modify the background color of the pie chart image
+
+    fig.patch.set_facecolor('black')
+    # Display the pie chart in Streamlit
+    st.pyplot(fig)
 
 def plot_metric(label, value, prefix="", suffix="", show_graph=False, color_graph="", col=None):
     fig = go.Figure()
@@ -100,22 +121,24 @@ def extract_results(df):
     return results_dict
 
 def show_results_distribution(df, subheader=""):
-    # Add smaller header
-    st.subheader(subheader)
-    
-    column_1, column_2, column_3= st.columns(3)
-    
-    
-    results_dict = extract_results(df)
-    w = results_dict['W']
-    d = results_dict['D']
-    l = results_dict['L']
-    with column_1:
-        plot_metric("W", w*100, suffix="%")
+    column_1, column_2, column_3 = st.columns(3)
     with column_2:
-        plot_metric("D", d*100, suffix="%")
+        results_dict = {'GF > 0' : df[df.GF > 0].shape[0] / df.shape[0], 'GF = 0': 1 - df[df.GF > 0].shape[0] / df.shape[0]}
+        colors = {'GF > 0': '#4CAF50', 'GF = 0': '#F44336'}
+        plot_pie_chart(results_dict, colors)
+
     with column_3:
-        plot_metric("L", l*100, suffix="%") 
+        results_dict = {'GA > 0' : df[df.GA > 0].shape[0] / df.shape[0], 'GA = 0': 1 - df[df.GA > 0].shape[0] / df.shape[0]}
+        colors = {'GA > 0': '#4CAF50', 'GA = 0': '#F44336'}
+        plot_pie_chart(results_dict, colors)
+        
+    with column_1:
+    # Add smaller header
+        colors = {'W': '#4CAF50', 'L': '#F44336', 'D': '#FFC107'}
+
+        results_dict = extract_results(df)
+        plot_pie_chart(results_dict, colors, subheader)
+    
 
 def show_match_sequence(results_df,over_line):
 
@@ -144,10 +167,17 @@ def show_match_sequence(results_df,over_line):
 def show_overs_and_both_scores(df, over_line):
     column_1, column_2 = st.columns(2)
     summary = df[['GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sum() / len(df)
+    
     with column_1:
-        plot_metric("Both teams score", summary['GF_>0 & GA_>0']*100, suffix="%")
+        results_dict = {'Ambos Anotan': summary['GF_>0 & GA_>0']*100, "No-Ambos Anotan" : 100 -summary['GF_>0 & GA_>0']*100} 
+        colors = {'Ambos Anotan': '#4CAF50', 'No-Ambos Anotan': '#F44336'}
+
+        plot_pie_chart(results_dict,  colors, 'Ambos Anotan')
     with column_2:
-        plot_metric("Over", summary[f'TotalGoals_>{over_line}']*100, suffix="%")
+        colors = {'Over': '#4CAF50', 'Under': '#F44336'}
+
+        results_dict = {'Over':summary[f'TotalGoals_>{over_line}']*100, 'Under': 100 - summary[f'TotalGoals_>{over_line}']*100}
+        plot_pie_chart(results_dict, colors, 'Over')
 
 def show_historic_stats(df):
     column_1, column_2, column_3, column_4 = st.columns(4)
@@ -238,48 +268,74 @@ if __name__ == "__main__":
     if selected == 'Historic Match Results':
 
         st.header("Match Analysis")
+        st.subheader(f"Historic {home_team} vs {away_team} Results")
         # Historic Match Results
         historic_match_data = df[(df.MetaEquipo == home_team) & (df.Opponent == away_team) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
-        show_results_distribution(historic_match_data, subheader=f"Historic {home_team} vs {away_team} Results")
+        column_1, column_2 = st.columns(2)
+        with column_1:
+            show_results_distribution(historic_match_data, subheader=f"Historic {home_team} vs {away_team} Results")
+        with column_2:
+            show_overs_and_both_scores(historic_match_data, over_line)
+
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_overs_and_both_scores(historic_match_data, over_line)
-        st.table(historic_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False).head(10))
+        
+        st.table(historic_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False).head(10))
         
 
+        st.subheader(f"Historic {home_team} vs {away_team} Results at {home_team}'s Venue")
         historic_match_data_venue = df[(df.MetaEquipo == home_team) & (df.Opponent == away_team) & (df.Venue == 'Home')& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
-        show_results_distribution(historic_match_data_venue, subheader=f"Historic {home_team} vs {away_team} Results at {home_team}'s Venue")
+        column_1, column_2 = st.columns(2)
+        with column_1:
+            show_results_distribution(historic_match_data_venue, subheader=f"Historic {home_team} vs {away_team} Results at {home_team}'s Venue")
+        with column_2:
+            show_overs_and_both_scores(historic_match_data_venue, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_overs_and_both_scores(historic_match_data_venue, over_line)
-        st.table(historic_match_data_venue[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False).head(10))
+        st.table(historic_match_data_venue[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False).head(10))
+        
         # Last 10 Match Results
+        st.subheader(f"Last 10 {home_team} vs {away_team} Match Results")
         last_10_match_data = df[(df.MetaEquipo == home_team) & (df.Opponent == away_team)& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
-        show_results_distribution(last_10_match_data, subheader=f"Last 10 {home_team} vs {away_team} Match Results")
+        column_1, column_2 = st.columns(2)
+
+        with column_1:
+            show_results_distribution(last_10_match_data, subheader=f"Last 10 {home_team} vs {away_team} Match Results")
+        with column_2:
+            show_overs_and_both_scores(last_10_match_data, over_line)
+            
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data, over_line)
+        # show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_overs_and_both_scores(last_10_match_data, over_line)
-        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False))
+        df = last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
+        # Function to apply color based on logic
+        def highlight_cells(x):
+            color1 = 'red' if x['Result'] == 'L' else 'green' if x['Result'] == 'W' else 'yellow'
+            color2 = 'red' if x['GF_>0 & GA_>0'] == 0 else 'green'
+            color3 = 'red' if x[f'TotalGoals_>{over_line}'] == 0 else 'green'
+            styles = [f'background-color: {color1}', f'background-color: {color2}', f'background-color: {color3}']
+            return styles
+        
+        st.dataframe(df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
         
         # Last 10 Match Results in the Corresponding Venue
+        st.subheader(f"Last 10 {home_team} vs {away_team} Match Results in the {home_team}'s Venue")
         last_10_match_data = df[(df.MetaEquipo == home_team) & (df.Opponent == away_team) & (df.Venue == 'Home')& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
-        show_results_distribution(last_10_match_data, subheader=f"Last 10 {home_team} vs {away_team} Match Results in the {home_team}'s Venue")
-        st.markdown("")
-        st.markdown("")
-        st.markdown("")
-        show_match_sequence(last_10_match_data, over_line)
-        st.markdown("")
-        st.markdown("")
-        st.markdown("")
-        show_overs_and_both_scores(last_10_match_data, over_line)
-        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False))
+        column_1, column_2 = st.columns(2)
+
+        with column_1:
+            show_results_distribution(last_10_match_data, subheader=f"Last 10 {home_team} vs {away_team} Match Results in the {home_team}'s Venue")
+        with column_2:
+            show_overs_and_both_scores(last_10_match_data, over_line)
+            
+        # show_match_sequence(last_10_match_data, over_line)
+        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False))
 
         st.subheader("Historic Match Stats")
         show_historic_stats(historic_match_data)
@@ -299,7 +355,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(match_data, over_line)
-        st.table(match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False).head(10))
+        st.table(match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False).head(10))
 
         # Last 10 home_team match results
         last_10_match_data = df[(df.MetaEquipo == home_team)& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
@@ -307,7 +363,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data, over_line)
+        # show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
@@ -315,7 +371,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False))
+        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False))
 
         
         
@@ -325,12 +381,12 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data, over_line)
+        # show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(last_10_match_data, over_line)
-        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False))
+        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False))
 
 
         last_season_data = df[(df.MetaEquipo == home_team) & (df.SeasonStage.isin(['Apertura','Liguilla'])) & (df.Temporada == "2023-2024")].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
@@ -338,12 +394,12 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_season_data, over_line)
+        # show_match_sequence(last_season_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(last_season_data, over_line)
-        st.table(last_season_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False).head(10))
+        st.table(last_season_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False).head(10))
 
 
         last_season_venue_data = df[(df.MetaEquipo == home_team) & (df.Venue == 'Home')& (df.SeasonStage.isin(['Apertura','Liguilla'])) & (df.Temporada == "2023-2024")].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
@@ -351,12 +407,12 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_season_venue_data, over_line)
+        # show_match_sequence(last_season_venue_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(last_season_venue_data, over_line)
-        st.table(last_season_venue_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False).head(10))
+        st.table(last_season_venue_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False).head(10))
 
         
         st.header(f"{away_team} Analysis")
@@ -366,7 +422,7 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(match_data, over_line)
-        st.table(match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False).head(10))
+        st.table(match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False).head(10))
 
         # Last 10 away_team match results
         last_10_match_data = df[(df.MetaEquipo == inverse_name_mapping[away_team])& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
@@ -374,12 +430,12 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data, over_line)
+        # show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(last_10_match_data, over_line)
-        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False))
+        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False))
 
         # Last 10 away_team match results in the corresponding venue
         last_10_match_data = df[(df.MetaEquipo == inverse_name_mapping[away_team]) & (df.Venue == 'Away')& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
@@ -387,36 +443,36 @@ if __name__ == "__main__":
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_10_match_data, over_line)
+        # show_match_sequence(last_10_match_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(last_10_match_data, over_line)
-        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False))
+        st.table(last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False))
 
         last_season_data = df[(df.MetaEquipo == inverse_name_mapping[away_team]) & (df.SeasonStage.isin(['Apertura','Liguilla'])) & (df.Temporada == "2023-2024")].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
         show_results_distribution(last_season_data, subheader=f"Last Season {away_team} Match Results ")
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_season_data, over_line)
+        # show_match_sequence(last_season_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(last_season_data, over_line)
-        st.table(last_season_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False))
+        st.table(last_season_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False))
 
         last_season_venue_data = df[(df.MetaEquipo == inverse_name_mapping[away_team]) & (df.Venue == 'Away')& (df.SeasonStage.isin(['Apertura','Liguilla'])) & (df.Temporada == "2023-2024")].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
         show_results_distribution(last_season_venue_data, subheader=f"Last Season {away_team} Match Results Away")
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        show_match_sequence(last_season_venue_data, over_line)
+        # show_match_sequence(last_season_venue_data, over_line)
         st.markdown("")
         st.markdown("")
         st.markdown("")
         show_overs_and_both_scores(last_season_venue_data, over_line)
-        st.table(last_season_venue_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0','TotalGoals_>2']].sort_values(by='Date', ascending=False))
+        st.table(last_season_venue_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False))
 
     if selected == 'Home Team Goals Analysis':
         timeseries_data = df[(df.MetaEquipo == home_team)& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(20)
