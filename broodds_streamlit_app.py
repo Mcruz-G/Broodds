@@ -219,7 +219,7 @@ def plot_timeseries(df,col,plot_title, format_col=None, hline=None):
     else:
         st.pyplot(fig)
 
-df = pd.read_csv("data/scores_and_fixtures.csv").iloc[:,1:]
+df = pd.read_csv("data/fullData.csv").iloc[:,1:]
 
 if __name__ == "__main__":
 
