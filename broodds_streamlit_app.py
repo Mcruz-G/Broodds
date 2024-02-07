@@ -31,6 +31,16 @@ name_mapping = {
 
 inverse_name_mapping = {v: k for k, v in name_mapping.items()}
 
+# Function to create a gradient color based on a value
+def color_gradient(val, df, reference_col):
+    min_val = df[[reference_col]].min()
+    max_val = df[[reference_col]].max()
+    normalized_val = (val - min_val) / (max_val - min_val)
+    r = int(160 * (1 - normalized_val))
+    g = int(160 * normalized_val)
+    b = 0
+    return f'background-color: rgb({r},{g},{b})'
+
 
 def plot_pie_chart(results_dict, colors, title=None):
     # Create a dark background
@@ -280,7 +290,7 @@ if __name__ == "__main__":
         selected = option_menu(
             menu_title="Hello BroOdder!",
             options=['Historic Match Results', 'Team Analysis', 'Goals Analysis',
-                     'Home Team Goals Analysis', 'Away Team Goals Analysis', 'Positions Table'],
+                     'Home Team Goals Analysis', 'Away Team Goals Analysis', 'Season Analysis'],
         )
         
     if selected == 'Historic Match Results':
@@ -559,8 +569,9 @@ if __name__ == "__main__":
         plot_timeseries(timeseries_data, "xGA",f"{home_team}'s xGA Against {away_team} at Home Timeseries", column_2)
 
 
-    if selected == 'Positions Table':
+    if selected == 'Season Analysis':
         st.markdown("---")
+        st.subheader("Positions Table")
         temporadas = df.Temporada.unique().tolist()
         season_stages = ['Apertura','Clausura']
         jornadas = list(range(1,19))
@@ -604,6 +615,39 @@ if __name__ == "__main__":
         data = df[(df.MetaEquipo == inverse_name_mapping[away_team]) & (df.Jornada == jornada) & (df.Temporada >= "2021-2022") ][columns].sort_values(by='Date')
         plot_timeseries(data, col='ranking',plot_title=f"{away_team}'s ranking performance along Jornada {jornada}",format_col=column_2, hline=None, ma=False)
         column_2.dataframe(data)
+
+        st.markdown('---')
+        temporada = st.selectbox(
+            'Season',
+            temporadas
+        )
+
+        stage = st.selectbox(
+            'Stage',
+            season_stages
+        )
+
+        columns = ['MetaEquipo', 'ranking',
+                   'current_goals','current_exp_goals',
+                   ]
+
+        data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == 4)][columns]
+        data = data.groupby('MetaEquipo').max().reset_index()
+        data['Offensive Superavit'] = data['current_goals'] - data['current_exp_goals']
+        data = data.sort_values(by='Offensive Superavit', ascending=False)
+        data[['ranking', 'current_goals']] = data[['ranking', 'current_goals']].astype(int)
+        st.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']))
+
+        columns = ['MetaEquipo', 'ranking',
+                   'current_goals_against','current_exp_goals_against',
+                   ]
+
+        data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == 4)][columns]
+        data = data.groupby('MetaEquipo').max().reset_index()
+        data['Deffensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
+        data = data.sort_values(by='Deffensive Superavit', ascending=False)
+        data[['ranking', 'current_goals_against']] = data[['ranking', 'current_goals_against']].astype(int)
+        st.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Deffensive Superavit'), subset=['Deffensive Superavit']))
 
     # You can add more content below the columns
     st.markdown("---")
