@@ -617,12 +617,14 @@ if __name__ == "__main__":
         column_2.dataframe(data)
 
         st.markdown('---')
-        temporada = st.selectbox(
+        column_1, column_2 = st.columns(2)
+
+        temporada = column_1.selectbox(
             'Season',
             temporadas
         )
 
-        stage = st.selectbox(
+        stage = column_2.selectbox(
             'Stage',
             season_stages
         )
@@ -636,7 +638,18 @@ if __name__ == "__main__":
         data['Offensive Superavit'] = data['current_goals'] - data['current_exp_goals']
         data = data.sort_values(by='Offensive Superavit', ascending=False)
         data[['ranking', 'current_goals']] = data[['ranking', 'current_goals']].astype(int)
-        st.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']))
+        data = data.rename(columns={'current_goals':'GF', 'current_exp_goals':'xG'})
+
+        column_1.subheader("Offensive Superavit")
+
+        match_filter = column_1.checkbox("Filter Match Teams")
+
+        if match_filter:
+            data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
+        
+        column_1.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']))
+
+
 
         columns = ['MetaEquipo', 'ranking',
                    'current_goals_against','current_exp_goals_against',
@@ -644,10 +657,19 @@ if __name__ == "__main__":
 
         data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == 4)][columns]
         data = data.groupby('MetaEquipo').max().reset_index()
-        data['Deffensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
-        data = data.sort_values(by='Deffensive Superavit', ascending=False)
+        data['Defensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
+        data = data.sort_values(by='Defensive Superavit', ascending=False)
         data[['ranking', 'current_goals_against']] = data[['ranking', 'current_goals_against']].astype(int)
-        st.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Deffensive Superavit'), subset=['Deffensive Superavit']))
+        data = data.rename(columns={'current_goals_against':'GA', 'current_exp_goals_against':'xGA'})
+        
+        column_2.subheader("Defensive Superavit")
+        
+        match_filter = column_2.checkbox("Filter Match Teams ")
+
+        if match_filter:
+            data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
+            
+        column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit'), subset=['Defensive Superavit']))
 
     # You can add more content below the columns
     st.markdown("---")
