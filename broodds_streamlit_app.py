@@ -251,8 +251,8 @@ if __name__ == "__main__":
 
     
     set_streamlit_config()
-    
-    st.title("Welcome to BroOdds LIGA MX Dashboard")
+    column_1, column_2, column_3 = st.columns(3)
+    column_2.title("Welcome to BroOdds LIGA MX Dashboard")
 
     #Inputs
     
@@ -636,7 +636,7 @@ if __name__ == "__main__":
                    'current_goals','current_exp_goals',
                    ]
 
-        data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == 4)][columns]
+        data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)][columns]
         data = data.groupby('MetaEquipo').max().reset_index()
         data['Offensive Superavit'] = data['current_goals'] - data['current_exp_goals']
         data = data.sort_values(by='Offensive Superavit', ascending=False)
@@ -658,7 +658,7 @@ if __name__ == "__main__":
                    'current_goals_against','current_exp_goals_against',
                    ]
 
-        data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == 4)][columns]
+        data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)][columns]
         data = data.groupby('MetaEquipo').max().reset_index()
         data['Defensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
         data = data.sort_values(by='Defensive Superavit', ascending=True)
