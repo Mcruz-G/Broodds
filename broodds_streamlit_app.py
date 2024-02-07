@@ -32,12 +32,15 @@ name_mapping = {
 inverse_name_mapping = {v: k for k, v in name_mapping.items()}
 
 # Function to create a gradient color based on a value
-def color_gradient(val, df, reference_col):
-    min_val = df[[reference_col]].min()
-    max_val = df[[reference_col]].max()
+def color_gradient(val, df, reference_col, reverse_color_scale=False):
+    if reverse_color_scale:
+        val *= -1
+
+    min_val = df[[reference_col]].min() 
+    max_val = df[[reference_col]].max() 
     normalized_val = (val - min_val) / (max_val - min_val)
-    r = int(160 * (1 - normalized_val))
-    g = int(160 * normalized_val)
+    r = int(100 * (1 - normalized_val))
+    g = int(100 * normalized_val)
     b = 0
     return f'background-color: rgb({r},{g},{b})'
 
@@ -658,7 +661,7 @@ if __name__ == "__main__":
         data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == 4)][columns]
         data = data.groupby('MetaEquipo').max().reset_index()
         data['Defensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
-        data = data.sort_values(by='Defensive Superavit', ascending=False)
+        data = data.sort_values(by='Defensive Superavit', ascending=True)
         data[['ranking', 'current_goals_against']] = data[['ranking', 'current_goals_against']].astype(int)
         data = data.rename(columns={'current_goals_against':'GA', 'current_exp_goals_against':'xGA'})
         
@@ -668,8 +671,7 @@ if __name__ == "__main__":
 
         if match_filter:
             data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
-            
-        column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit'), subset=['Defensive Superavit']))
+        column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']))
 
     # You can add more content below the columns
     st.markdown("---")
