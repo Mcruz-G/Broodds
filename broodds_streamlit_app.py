@@ -585,19 +585,23 @@ if __name__ == "__main__":
         st.dataframe(df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == jornada)][columns].sort_values(by='ranking'))
         
         st.markdown("---")
+        column_1, column_2, column_3 = st.columns(3)
 
+        column_2.subheader("Analysis by Jornada")
+        jornada = column_2.selectbox(
+            'Jornada',
+            jornadas
+        )
         column_1, column_2 = st.columns(2)
 
-        st.subheader("Home team analysis by Jornada")
         
         columns = ['Date','Temporada','SeasonStage','MetaEquipo','Opponent','Venue','Result','GF','GA','ranking']
-        data = df[(df.MetaEquipo == home_team) & (df.Jornada == jornada) & (df.Temporada >= "2021-2022") & (df.Date <= "2024-02-10")][columns].sort_values(by='Date')
+        data = df[(df.MetaEquipo == home_team) & (df.Jornada == jornada) & (df.Temporada >= "2021-2022") ][columns].sort_values(by='Date')
         plot_timeseries(data, col='ranking',plot_title=f"{home_team}'s ranking performance along Jornada {jornada}",format_col=column_1, hline=None, ma=False)
         column_1.dataframe(data)
         
-        st.subheader("Away team analysis by Jornada")
         
-        data = df[(df.MetaEquipo == inverse_name_mapping[away_team]) & (df.Jornada == jornada) & (df.Temporada >= "2021-2022") & (df.Date <= "2024-02-10")][columns].sort_values(by='Date')
+        data = df[(df.MetaEquipo == inverse_name_mapping[away_team]) & (df.Jornada == jornada) & (df.Temporada >= "2021-2022") ][columns].sort_values(by='Date')
         plot_timeseries(data, col='ranking',plot_title=f"{away_team}'s ranking performance along Jornada {jornada}",format_col=column_2, hline=None, ma=False)
         column_2.dataframe(data)
 
