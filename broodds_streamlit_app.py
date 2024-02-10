@@ -668,11 +668,43 @@ if __name__ == "__main__":
         column_2.subheader("Defensive Superavit")
         
         match_filter = column_2.checkbox("Filter Match Teams ")
-
+        
         if match_filter:
             data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
         column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']))
+        st.markdown("---")
 
+
+        
+        st.subheader("Summary by Jornada")
+        temporada = st.selectbox(
+            'Season ',
+            temporadas
+        )
+        stage = st.selectbox(
+            'Stage ',
+            season_stages
+        )
+        columns = ["Jornada","Venue","GF","GA","Result"]
+        data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)][columns].dropna(subset={'Result'})
+        data['HomeGoals'] = data.apply(lambda x: x['GF'] if x['Venue'] == 'Home' else x['GA'], axis=1) 
+        data['AwayGoals'] = data.apply(lambda x: x['GF'] if x['Venue'] == 'Away' else x['GA'], axis=1)
+        data['HomeTeamWins'] = data.apply(lambda x: 1 if (((x['Result'] == 'W') and (x['Venue'] == 'Home')) or ((x['Result'] == "L") and x['Venue'] == 'Away')) else 0, axis=1)
+        data['AwayTeamWins'] = data.apply(lambda x: 1 if (((x['Result'] == 'W') and (x['Venue'] == 'Away')) or ((x['Result'] == "L") and x['Venue'] == 'Home')) else 0, axis=1 )
+        data['Draws'] = data['Result'] == 'D'
+        data = data.groupby(by=['Jornada']).sum().reset_index()
+        columns.remove('Result')
+        columns.remove('GF')
+        columns.remove('GA')
+        columns.remove('Venue')
+        columns += ['HomeGoals','AwayGoals','HomeTeamWins', 'AwayTeamWins','Draws']
+        data = data[columns]
+        # data[columns] = data[columns].astype(int)
+        # columns.remove('Jornada')
+        # data[columns] = data[columns] // 2
+
+
+        st.dataframe(data)
     # You can add more content below the columns
     st.markdown("---")
     st.subheader("Additional Content Below Columns")
