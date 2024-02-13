@@ -657,7 +657,7 @@ if __name__ == "__main__":
         if match_filter:
             data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
         
-        column_1.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']))
+        column_1.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']).format("{:.2f}", subset=['xG', 'Offensive Superavit']))
 
 
 
