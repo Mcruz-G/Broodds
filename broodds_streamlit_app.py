@@ -678,7 +678,7 @@ if __name__ == "__main__":
         
         if match_filter:
             data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
-        column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']))
+        column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']).format("{:.2f}", subset=['xGA', 'Defensive Superavit']))
         st.markdown("---")
         st.subheader("Real vs Expected")
         columns = ['MetaEquipo',
@@ -690,6 +690,7 @@ if __name__ == "__main__":
         data = data.groupby('MetaEquipo').max().reset_index()
         data = data.merge(aux_data, on=['MetaEquipo'], how='left')
         data['Points Superavit'] = data['current_points'] - data['current_exp_points']
+        data[[ 'current_points','current_exp_points', 'current_goals_difference', 'Points Superavit','ranking']] = data[[ 'current_points','current_exp_points', 'current_goals_difference', 'Points Superavit','ranking']].astype(int)
         match_filter = st.checkbox("Filter Match Teams  " )
         
         if match_filter:
