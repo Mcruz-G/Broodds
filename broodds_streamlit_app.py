@@ -7,6 +7,16 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from matplotlib import style
 import math
+# from langchain_experimental.agents import create_csv_agent
+# from langchain.llms import OpenAI
+
+# from langchain.agents.agent_types import AgentType
+# from langchain_experimental.agents.agent_toolkits import create_csv_agent
+# from langchain_openai import ChatOpenAI, OpenAI
+# from pandasai.llm.openai import OpenAI
+# from pandasai import PandasAI
+
+# from dotenv import load_dotenv
 
 name_mapping = {
     'America' : 'América',
@@ -30,6 +40,14 @@ name_mapping = {
 }
 
 inverse_name_mapping = {v: k for k, v in name_mapping.items()}
+
+def chat_with_csv(df, prompt):
+    print(prompt)
+    llm = OpenAI()
+    pandas_ai = PandasAI(llm)
+    result = pandas_ai.run(df,prompt)
+    print(result)
+    return result
 
 # Function to create a gradient color based on a value
 def color_gradient(val, df, reference_col, reverse_color_scale=False):
@@ -249,7 +267,7 @@ df = pd.read_csv("data/scores_and_fixtures.csv").iloc[:,1:]
 
 if __name__ == "__main__":
 
-    
+    # load_dotenv()
     set_streamlit_config()
     column_1, column_2, column_3 = st.columns(3)
     column_2.title("Welcome to BroOdds LIGA MX Dashboard")
@@ -293,7 +311,8 @@ if __name__ == "__main__":
         selected = option_menu(
             menu_title="Hello BroOdder!",
             options=['Historic Match Results', 'Team Analysis', 'Goals Analysis',
-                     'Home Team Goals Analysis', 'Away Team Goals Analysis', 'Season Analysis'],
+                     'Home Team Goals Analysis', 'Away Team Goals Analysis', 
+                     'Season Analysis', 'Broodd GPT'],
         )
         
     if selected == 'Historic Match Results':
@@ -602,12 +621,7 @@ if __name__ == "__main__":
         column_1, column_2, column_3 = st.columns(3)
 
         column_2.subheader("Analysis by Jornada")
-        jornada = column_2.selectbox(
-            'Jornada',
-            jornadas
-        )
         column_1, column_2 = st.columns(2)
-
         
         columns = ['Date','Temporada','SeasonStage','MetaEquipo','Opponent','Venue','Result','GF','GA','ranking']
         data = df[(df.MetaEquipo == home_team) & (df.Jornada == jornada) & (df.Temporada >= "2021-2022") ][columns].sort_values(by='Date')
@@ -621,16 +635,6 @@ if __name__ == "__main__":
 
         st.markdown('---')
         column_1, column_2 = st.columns(2)
-
-        temporada = column_1.selectbox(
-            'Season',
-            temporadas
-        )
-
-        stage = column_2.selectbox(
-            'Stage',
-            season_stages
-        )
 
         columns = ['MetaEquipo', 'ranking',
                    'current_goals','current_exp_goals',
@@ -654,7 +658,7 @@ if __name__ == "__main__":
 
 
 
-        columns = ['MetaEquipo', 'ranking',
+        columns = ['MetaEquipo',
                    'current_goals_against','current_exp_goals_against',
                    ]
 
@@ -662,7 +666,7 @@ if __name__ == "__main__":
         data = data.groupby('MetaEquipo').max().reset_index()
         data['Defensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
         data = data.sort_values(by='Defensive Superavit', ascending=True)
-        data[['ranking', 'current_goals_against']] = data[['ranking', 'current_goals_against']].astype(int)
+        data[['current_goals_against']] = data[['current_goals_against']].astype(int)
         data = data.rename(columns={'current_goals_against':'GA', 'current_exp_goals_against':'xGA'})
         
         column_2.subheader("Defensive Superavit")
@@ -674,7 +678,30 @@ if __name__ == "__main__":
         column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']))
         st.markdown("---")
 
+        columns = ['MetaEquipo',
+                   'current_points','current_exp_points', 'current_goals_difference'
+                   ]
+        data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)].dropna(subset={'Result'})[columns]
+        aux_data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == jornada)][['MetaEquipo','ranking']].rename({'ranking':"current_ranking"})
 
+        data = data.groupby('MetaEquipo').max().reset_index()
+        data = data.merge(aux_data, on=['MetaEquipo'], how='left')
+        data['Points Superavit'] = data['current_points'] - data['current_exp_points']
+        match_filter = st.checkbox("Filter Match Teams  " )
+        
+        if match_filter:
+            data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
+        
+        st.markdown("By Points Superavit")
+        st.dataframe(data.sort_values(by='Points Superavit',  ascending=False).style.applymap(lambda x: color_gradient(x, data, 'Points Superavit'), subset=['Points Superavit']))
+        
+        st.markdown("By Ranking")
+        st.dataframe(data.sort_values(by='ranking').style.applymap(lambda x: color_gradient(x, data, 'Points Superavit'), subset=['Points Superavit']))
+        
+        st.markdown("By Goals Difference")
+        st.dataframe(data.sort_values(by='current_goals_difference', ascending=False).style.applymap(lambda x: color_gradient(x, data, 'Points Superavit'), subset=['Points Superavit']))
+        
+        
         
         st.subheader("Summary by Jornada")
         temporada = st.selectbox(
@@ -705,6 +732,13 @@ if __name__ == "__main__":
 
 
         st.dataframe(data)
+
+    # if selected == 'Broodd GPT':
+    #     user_question = st.text_input("Ask a question about Broodds Database")
+    #     if user_question is not None and user_question != "":
+    #         result = chat_with_csv(df, user_question)
+
+
     # You can add more content below the columns
     st.markdown("---")
     st.subheader("Additional Content Below Columns")
