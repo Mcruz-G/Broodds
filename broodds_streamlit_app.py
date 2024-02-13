@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from matplotlib import style
 import math
+import numpy as np 
 # from langchain_experimental.agents import create_csv_agent
 # from langchain.llms import OpenAI
 
@@ -307,6 +308,8 @@ if __name__ == "__main__":
                                     season_stages)
     
     # SideBar
+    # Display the logo using st.image()
+
     with st.sidebar:
         selected = option_menu(
             menu_title="Hello BroOdder!",
@@ -475,7 +478,7 @@ if __name__ == "__main__":
         st.header(f"{away_team} Analysis")
 
         st.subheader(f"{away_team}'s Historic Results Away")
-        match_data = df[(df.MetaEquipo == inverse_name_mapping[away_team]) & (df.Venue == 'Home')& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
+        match_data = df[(df.MetaEquipo == inverse_name_mapping[away_team]) & (df.Venue == 'Away')& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
         show_results_distribution(match_data, subheader=f"{away_team}'s Historic Results Away")
         st.markdown("")
         st.markdown("")
@@ -594,7 +597,7 @@ if __name__ == "__main__":
     if selected == 'Season Analysis':
         st.markdown("---")
         st.subheader("Positions Table")
-        temporadas = df.Temporada.unique().tolist()
+        temporadas = df.Temporada.unique().tolist()[::-1]
         season_stages = ['Apertura','Clausura']
         jornadas = list(range(1,19))
 
@@ -704,28 +707,20 @@ if __name__ == "__main__":
         
         
         st.subheader("Summary by Jornada")
-        temporada = st.selectbox(
-            'Season ',
-            temporadas
-        )
-        stage = st.selectbox(
-            'Stage ',
-            season_stages
-        )
-        columns = ["Jornada","Venue","GF","GA","Result"]
+        
+        columns = ['MetaEquipo','Date',"Jornada","Venue","GF","GA","Result",'Opponent']
         data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)][columns].dropna(subset={'Result'})
+        data['HomeTeam'] = data.apply(lambda x: x['MetaEquipo'] if x['Venue'] == 'Home' else inverse_name_mapping[x['Opponent']], axis=1)
         data['HomeGoals'] = data.apply(lambda x: x['GF'] if x['Venue'] == 'Home' else x['GA'], axis=1) 
         data['AwayGoals'] = data.apply(lambda x: x['GF'] if x['Venue'] == 'Away' else x['GA'], axis=1)
-        data['HomeTeamWins'] = data.apply(lambda x: 1 if (((x['Result'] == 'W') and (x['Venue'] == 'Home')) or ((x['Result'] == "L") and x['Venue'] == 'Away')) else 0, axis=1)
-        data['AwayTeamWins'] = data.apply(lambda x: 1 if (((x['Result'] == 'W') and (x['Venue'] == 'Away')) or ((x['Result'] == "L") and x['Venue'] == 'Home')) else 0, axis=1 )
+        data['HomeTeamWins'] = data.apply(lambda x: True if (((x['Result'] == 'W') and (x['Venue'] == 'Home')) or ((x['Result'] == "L") and (x['Venue'] == 'Away'))) else False, axis=1)
+        data['AwayTeamWins'] = data.apply(lambda x: True if (((x['Result'] == 'W') and (x['Venue'] == 'Away')) or ((x['Result'] == "L") and (x['Venue'] == 'Home'))) else False, axis=1 )
         data['Draws'] = data['Result'] == 'D'
+        columns = ['Jornada','HomeTeam','HomeGoals','AwayGoals','HomeTeamWins', 'AwayTeamWins','Draws', ]
+        data = data[columns].drop_duplicates()
+        data = data.groupby(by=['Jornada', 'HomeTeam']).sum().reset_index()
         data = data.groupby(by=['Jornada']).sum().reset_index()
-        columns.remove('Result')
-        columns.remove('GF')
-        columns.remove('GA')
-        columns.remove('Venue')
-        columns += ['HomeGoals','AwayGoals','HomeTeamWins', 'AwayTeamWins','Draws']
-        data = data[columns]
+        # data = data.iloc[:,1:]
         # data[columns] = data[columns].astype(int)
         # columns.remove('Jornada')
         # data[columns] = data[columns] // 2
