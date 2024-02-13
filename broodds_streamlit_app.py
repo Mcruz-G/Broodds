@@ -726,7 +726,7 @@ if __name__ == "__main__":
         # data[columns] = data[columns] // 2
 
 
-        st.dataframe(data)
+        st.dataframe(data[['Jornada','HomeGoals','AwayGoals','HomeTeamWins','AwayTeamWins','Draws']])
 
     # if selected == 'Broodd GPT':
     #     user_question = st.text_input("Ask a question about Broodds Database")
