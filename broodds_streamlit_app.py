@@ -677,7 +677,7 @@ if __name__ == "__main__":
             data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
         column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']))
         st.markdown("---")
-
+        st.subheader("Real vs Expected")
         columns = ['MetaEquipo',
                    'current_points','current_exp_points', 'current_goals_difference'
                    ]
