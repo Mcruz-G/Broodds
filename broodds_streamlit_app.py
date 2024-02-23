@@ -8,16 +8,12 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import math
 import numpy as np 
-# from langchain_experimental.agents import create_csv_agent
-# from langchain.llms import OpenAI
 
-# from langchain.agents.agent_types import AgentType
-# from langchain_experimental.agents.agent_toolkits import create_csv_agent
-# from langchain_openai import ChatOpenAI, OpenAI
-# from pandasai.llm.openai import OpenAI
-# from pandasai import PandasAI
+from matplotlib.offsetbox import (OffsetImage,AnnotationBbox)
+from mplsoccer import FontManager, add_image
+from PIL import Image
+import os
 
-# from dotenv import load_dotenv
 
 name_mapping = {
     'America' : 'América',
@@ -42,13 +38,98 @@ name_mapping = {
 
 inverse_name_mapping = {v: k for k, v in name_mapping.items()}
 
-def chat_with_csv(df, prompt):
-    print(prompt)
-    llm = OpenAI()
-    pandas_ai = PandasAI(llm)
-    result = pandas_ai.run(df,prompt)
-    print(result)
-    return result
+image_name_mapping = {
+    'America' : 'america',
+    'Atlas' : 'atlas',
+    'Atletico' : 'atleticosl',
+    'Cruz_Azul' : 'cruzazul',
+    'FC_Juarez' : 'juarez',
+    'Guadalajara' : 'guadalajara',
+    'Leon' : 'leon',
+    'Mazatlan' : 'mazatlan',
+    'Monterrey' : 'monterrey',
+    'Necaxa' : 'necaxa',
+    'Pachuca' : 'pachuca',
+    'Puebla' : 'puebla',
+    'Pumas_UNAM' : 'pumas',
+    'Queretaro' : 'queretaro',
+    'Santos_Laguna' : 'santos',
+    'Tijuana' : 'tijuana',
+    'Toluca' : 'toluca',
+    'UANL' : 'tigres',
+}
+
+#Escudos
+def getImage(path, zoom=0.1):
+    return OffsetImage(plt.imread(path), zoom=zoom)
+
+def load_parameters():
+    URL3 = 'https://github.com/VanillaandCream/Catamaran-Tamil/blob/master/Fonts/Catamaran-Medium.ttf?raw=true'
+    catamaran2 = FontManager(URL3)
+    URL = 'https://github.com/google/fonts/blob/main/ofl/fjallaone/FjallaOne-Regular.ttf?raw=true'
+    robotto_regular = FontManager(URL)
+    URL2 = 'https://github.com/VanillaandCream/Catamaran-Tamil/blob/master/Fonts/Catamaran-ExtraBold.ttf?raw=true'
+    catamaran = FontManager(URL2)
+    URL4 = 'https://github.com/google/fonts/blob/main/ofl/bungeeinline/BungeeInline-Regular.ttf?raw=true'
+    titulo = FontManager(URL4)
+    return catamaran, catamaran2, robotto_regular, titulo
+
+
+def make_scatter_team_plot(plot_data, xcolumn, ycolumn, title
+                           , xlabel='Atributo 1'
+                           , ylabel='Atributo 2'
+                           , facecolor='#292323', color_plot='white'
+                           , tournament='Liga MX'
+                           , zoom = 0.07):
+    path = os.getcwd()
+    files = os.listdir('images/ligamx/')
+
+    #Complete the code 
+    catamaran, catamaran2, robotto_regular, titulo = load_parameters()
+    #Seteo los parametros del scatter
+    print(plot_data.columns)
+    x, promx = plot_data[xcolumn], plot_data[xcolumn].mean() 
+    y, promy = plot_data[ycolumn], plot_data[ycolumn].mean()
+
+    #Figura, axis y el scatter
+    fig, ax = plt.subplots(figsize =(20, 12))
+    ax.scatter(x, y)
+
+    #Detalles esteticos
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_color(color_plot)
+    ax.spines['left'].set_color(color_plot)
+    for axis in ['top','bottom','left','right']:
+        ax.spines[axis].set_linewidth(1.5)
+    ax.yaxis.set_tick_params(pad = 12,colors=color_plot,labelsize=12)
+    ax.xaxis.set_tick_params(pad = 12,colors=color_plot,labelsize=12)
+
+    fig.patch.set_facecolor(facecolor)
+    ax.set_facecolor(facecolor)
+    ax.grid(aa=True, color =color_plot,linestyle ='-', linewidth = 0,alpha = 0.5)
+    ax.grid(which='minor', color =color_plot,linestyle ='-', linewidth = 1.5, alpha=1)
+
+    #Lineas de Promedio
+    ax.axvline(promx, color=color_plot)
+    ax.axhline(promy, color=color_plot)
+
+ 
+    ax.set_xlabel(xlabel, fontproperties=robotto_regular.prop,fontsize=18,color=color_plot)
+    ax.set_ylabel(ylabel, fontproperties=robotto_regular.prop,fontsize=18,color=color_plot)
+    ax.set_title(f'{xlabel} Vs {ylabel} - {tournament}', fontproperties=robotto_regular.prop,
+                        loc ='left', color=color_plot,fontsize = 25,fontweight="bold", pad=20)
+
+    for index, row in plot_data.iterrows():
+        x0, y0 = row[xcolumn], row[ycolumn]
+        team = row['MetaEquipo']
+        img_team_name = image_name_mapping[team]
+        ab = AnnotationBbox(getImage(f'images/ligamx/{img_team_name}.png',zoom=zoom), (x0, y0), frameon=False)
+        ax.add_artist(ab)
+
+    st.pyplot(fig)
+
+
 
 # Function to create a gradient color based on a value
 def color_gradient(val, df, reference_col, reverse_color_scale=False):
@@ -315,7 +396,7 @@ if __name__ == "__main__":
             menu_title="Hello BroOdder!",
             options=['Historic Match Results', 'Team Analysis', 'Goals Analysis',
                      'Home Team Goals Analysis', 'Away Team Goals Analysis', 
-                     'Season Analysis', 'Broodd GPT'],
+                     'Season Analysis', '@Broodds Visuals'],
         )
         
     if selected == 'Historic Match Results':
@@ -729,10 +810,32 @@ if __name__ == "__main__":
 
         st.dataframe(data[['Jornada','HomeGoals','AwayGoals','HomeTeamWins','AwayTeamWins','Draws']])
 
-    # if selected == 'Broodd GPT':
-    #     user_question = st.text_input("Ask a question about Broodds Database")
-    #     if user_question is not None and user_question != "":
-    #         result = chat_with_csv(df, user_question)
+    if selected == '@Broodds Visuals':
+        # Scatter Plot 
+
+        temporadas = df.Temporada.unique().tolist()[::-1]
+        # Add a selectbox to the sidebar:
+        temporada = st.selectbox(
+            'Select Season',
+            temporadas
+        )
+        xvars = ['xG','xGA', 'GF','GA']
+        x_var = st.selectbox('Select X', xvars)
+
+        yvars = list(set(xvars) - set(x_var))
+        y_var = st.selectbox('Select Y', yvars)
+
+        
+        columns = ['MetaEquipo',
+                   'xG','xGA', 'GF','GA'
+                   ]
+        
+        data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
+        data = data.groupby('MetaEquipo').sum().reset_index()
+        st.dataframe(data)
+
+        make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
+        
 
 
     # You can add more content below the columns
