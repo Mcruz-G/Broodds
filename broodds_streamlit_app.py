@@ -832,7 +832,6 @@ if __name__ == "__main__":
         
         data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
         data = data.groupby('MetaEquipo').sum().reset_index()
-        st.dataframe(data)
 
         make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
         
