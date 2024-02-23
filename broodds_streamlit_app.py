@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import math
 import numpy as np 
+import time
 
 from matplotlib.offsetbox import (OffsetImage,AnnotationBbox)
 from mplsoccer import FontManager, add_image
@@ -825,7 +826,8 @@ if __name__ == "__main__":
         yvars = list(set(xvars) - set([x_var]))
         y_var = st.selectbox('Select Y', yvars)
 
-        
+        time.sleep(3)
+
         columns = ['MetaEquipo',
                    'xG','xGA', 'GF','GA'
                    ]
