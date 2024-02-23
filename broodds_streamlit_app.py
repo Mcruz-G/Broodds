@@ -386,7 +386,7 @@ if __name__ == "__main__":
     season_stages = st.multiselect(
                                     'Season Stages',
                                     season_stages,
-                                    season_stages)
+                                    ['Clausura'])
     
     # SideBar
     # Display the logo using st.image()
