@@ -822,7 +822,7 @@ if __name__ == "__main__":
         xvars = ['xG','xGA', 'GF','GA']
         x_var = st.selectbox('Select X', xvars)
 
-        yvars = list(set(xvars) - set(x_var))
+        yvars = list(set(xvars) - set([x_var]))
         y_var = st.selectbox('Select Y', yvars)
 
         
