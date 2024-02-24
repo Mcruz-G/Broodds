@@ -140,7 +140,7 @@ def color_gradient(val, df, reference_col, reverse_color_scale=False):
     min_val = df[[reference_col]].min() 
     max_val = df[[reference_col]].max() 
 
-    raise ValueError(f'{max_val}, {min_val}')
+    raise ValueError(f'{val},{max_val}, {min_val}')
     normalized_val = (val - min_val) / (max_val - min_val)
     r = int(100 * (1 - normalized_val))
     g = int(100 * normalized_val)
