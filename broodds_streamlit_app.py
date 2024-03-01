@@ -720,14 +720,31 @@ if __name__ == "__main__":
         column_2.dataframe(data)
 
         st.markdown('---')
+        venue = st.multiselect(
+                                    'Venue',
+                                    ['Home', 'Away'],
+                                    ['Home', 'Away'])
         column_1, column_2 = st.columns(2)
-
+        
+        
         columns = ['MetaEquipo', 'ranking',
-                   'current_goals','current_exp_goals',
+                   'current_goals','current_exp_goals', 'Date'
+                   ] if len(venue) == 2 else ['MetaEquipo', 'ranking',
+                   'current_goals_home','current_exp_goals_home', 'Date'
+                   ] if 'Home' in venue else ['MetaEquipo', 'ranking',
+                   'current_goals_away','current_exp_goals_away', 'Date'
                    ]
+        
 
         data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)][columns]
-        data = data.groupby('MetaEquipo').max().reset_index()
+        
+        if len(venue) == 1:
+            if 'Home' in venue:
+                data = data.rename(columns={'current_goals_home' : 'current_goals', 'current_exp_goals_home': 'current_exp_goals'})
+            else:
+                data = data.rename(columns={'current_goals_away' : 'current_goals', 'current_exp_goals_away': 'current_exp_goals'})
+        data = data.sort_values(by='Date', ascending=False)
+        data = data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals':'max', 'current_exp_goals':'max'}).reset_index()
         data['Offensive Superavit'] = data['current_goals'] - data['current_exp_goals']
         data = data.sort_values(by='Offensive Superavit', ascending=False)
         data[['ranking', 'current_goals']] = data[['ranking', 'current_goals']].astype(int)
@@ -740,16 +757,28 @@ if __name__ == "__main__":
         if match_filter:
             data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
         
+        
+        
         column_1.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']).format("{:.2f}", subset=['xG', 'Offensive Superavit']))
 
 
-
-        columns = ['MetaEquipo',
-                   'current_goals_against','current_exp_goals_against',
+        
+        columns = ['MetaEquipo', 'ranking',
+                   'current_goals_against','current_exp_goals_against', 'Date'
+                   ] if len(venue) == 2 else ['MetaEquipo', 'ranking',
+                   'current_goals_against_home','current_exp_goals_against_home', 'Date'
+                   ] if 'Home' in venue else ['MetaEquipo', 'ranking',
+                   'current_goals_against_away','current_exp_goals_against_away', 'Date'
                    ]
 
         data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)][columns]
-        data = data.groupby('MetaEquipo').max().reset_index()
+        if len(venue) == 1:
+            if 'Home' in venue:
+                data = data.rename(columns={'current_goals_against_home' : 'current_goals_against', 'current_exp_goals_against_home': 'current_exp_goals_against'})
+            else:
+                data = data.rename(columns={'current_goals_against_away' : 'current_goals_against', 'current_exp_goals_against_away': 'current_exp_goals_against'})
+        data = data.sort_values(by='Date', ascending=False)
+        data = data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals_against':'max', 'current_exp_goals_against':'max'}).reset_index()
         data['Defensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
         data = data.sort_values(by='Defensive Superavit', ascending=True)
         data[['current_goals_against']] = data[['current_goals_against']].astype(int)
@@ -762,11 +791,13 @@ if __name__ == "__main__":
         if match_filter:
             data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
         column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']).format("{:.2f}", subset=['xGA', 'Defensive Superavit']))
+        
         st.markdown("---")
         st.subheader("Real vs Expected")
         columns = ['MetaEquipo',
                    'current_points','current_exp_points', 'current_goals_difference'
                    ]
+        
         data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)].dropna(subset={'Result'})[columns]
         aux_data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == jornada)][['MetaEquipo','ranking']].rename({'ranking':"current_ranking"})
 
@@ -814,29 +845,30 @@ if __name__ == "__main__":
 
     if selected == '@Broodds Visuals':
         # Scatter Plot 
+        pass
 
-        temporadas = df.Temporada.unique().tolist()[::-1]
-        # Add a selectbox to the sidebar:
-        temporada = st.selectbox(
-            'Select Season',
-            temporadas
-        )
-        xvars = ['xG','xGA', 'GF','GA']
-        x_var = st.selectbox('Select X', xvars)
+        # temporadas = df.Temporada.unique().tolist()[::-1]
+        # # Add a selectbox to the sidebar:
+        # temporada = st.selectbox(
+        #     'Select Season',
+        #     temporadas
+        # )
+        # xvars = ['xG','xGA', 'GF','GA']
+        # x_var = st.selectbox('Select X', xvars)
 
-        yvars = list(set(xvars) - set([x_var]))
-        y_var = st.selectbox('Select Y', yvars)
+        # yvars = list(set(xvars) - set([x_var]))
+        # y_var = st.selectbox('Select Y', yvars)
 
-        time.sleep(3)
+        # time.sleep(3)
 
-        columns = ['MetaEquipo',
-                   'xG','xGA', 'GF','GA'
-                   ]
+        # columns = ['MetaEquipo',
+        #            'xG','xGA', 'GF','GA'
+        #            ]
         
-        data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
-        data = data.groupby('MetaEquipo').sum().reset_index()
+        # data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
+        # data = data.groupby('MetaEquipo').sum().reset_index()
 
-        make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
+        # make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
         
 
 
