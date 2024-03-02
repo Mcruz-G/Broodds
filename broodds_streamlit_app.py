@@ -754,8 +754,9 @@ if __name__ == "__main__":
         data = data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals':'max', 'current_exp_goals':'max', 'Jornada':'max'}).reset_index()
         data['Offensive Superavit'] = data['current_goals'] - data['current_exp_goals']
         data = data.sort_values(by='Offensive Superavit', ascending=False)
-        data[['ranking']] = data[['ranking']].astype(int)
+        data[['ranking', 'Jornada']] = data[['ranking', 'Jornada']].astype(int)
         data = data.rename(columns={'current_goals':'GF', 'current_exp_goals':'xG'})
+        data['GF'] = data.apply(lambda row: round(row['GF'], 1))
         if normalized:
             data['GF'] = data.apply(lambda row: row['GF'] / row['Jornada'], axis=1)
             data['xG'] = data.apply(lambda row: row['xG'] / row['Jornada'], axis=1)
@@ -794,8 +795,10 @@ if __name__ == "__main__":
         data = data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals_against':'max', 'current_exp_goals_against':'max', 'Jornada':'max'}).reset_index()
         data['Defensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
         data = data.sort_values(by='Defensive Superavit', ascending=True)
-        data[['ranking']] = data[['ranking']].astype(int)
+        data[['ranking', 'Jornada']] = data[['ranking', 'Jornada']].astype(int)
         data = data.rename(columns={'current_goals_against':'GA', 'current_exp_goals_against':'xGA'})
+        data['GA'] = data.apply(lambda row: round(row['GA'], 1))
+
         if normalized:
             data['GA'] = data.apply(lambda row: row['GA'] / row['Jornada'], axis=1)
             data['xGA'] = data.apply(lambda row: row['xGA'] / row['Jornada'], axis=1)
@@ -850,10 +853,6 @@ if __name__ == "__main__":
         data = data[columns].drop_duplicates()
         data = data.groupby(by=['Jornada', 'HomeTeam']).sum().reset_index()
         data = data.groupby(by=['Jornada']).sum().reset_index()
-        # data = data.iloc[:,1:]
-        # data[columns] = data[columns].astype(int)
-        # columns.remove('Jornada')
-        # data[columns] = data[columns] // 2
 
 
         st.dataframe(data[['Jornada','HomeGoals','AwayGoals','HomeTeamWins','AwayTeamWins','Draws']])
