@@ -756,7 +756,7 @@ if __name__ == "__main__":
         data = data.sort_values(by='Offensive Superavit', ascending=False)
         data[['ranking', 'Jornada']] = data[['ranking', 'Jornada']].astype(int)
         data = data.rename(columns={'current_goals':'GF', 'current_exp_goals':'xG'})
-        data['GF'] = data.apply(lambda row: round(row['GF'], 1))
+        data['GF'] = data.apply(lambda row: round(row['GF'], 1), axis=1)
         if normalized:
             data['GF'] = data.apply(lambda row: row['GF'] / row['Jornada'], axis=1)
             data['xG'] = data.apply(lambda row: row['xG'] / row['Jornada'], axis=1)
@@ -769,7 +769,7 @@ if __name__ == "__main__":
         
         
         
-        column_1.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']).format("{:.2f}", subset=['xG', 'Offensive Superavit']))
+        column_1.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']).format("{:.2f}", subset=['xG', 'GF', 'Offensive Superavit']))
 
 
         
@@ -797,7 +797,7 @@ if __name__ == "__main__":
         data = data.sort_values(by='Defensive Superavit', ascending=True)
         data[['ranking', 'Jornada']] = data[['ranking', 'Jornada']].astype(int)
         data = data.rename(columns={'current_goals_against':'GA', 'current_exp_goals_against':'xGA'})
-        data['GA'] = data.apply(lambda row: round(row['GA'], 1))
+        data['GA'] = data.apply(lambda row: round(row['GA'], 1), axis=1)
 
         if normalized:
             data['GA'] = data.apply(lambda row: row['GA'] / row['Jornada'], axis=1)
@@ -808,7 +808,7 @@ if __name__ == "__main__":
         
         if match_filter:
             data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
-        column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']).format("{:.2f}", subset=['xGA', 'Defensive Superavit']))
+        column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']).format("{:.2f}", subset=['xGA','GA', 'Defensive Superavit']))
         
         st.markdown("---")
         st.subheader("Real vs Expected")
