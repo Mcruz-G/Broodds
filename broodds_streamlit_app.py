@@ -859,7 +859,7 @@ if __name__ == "__main__":
 
     if selected == '@Broodds Visuals':
         # Scatter Plot 
-        # pass
+        pass
 
         # temporadas = df.Temporada.unique().tolist()[::-1]
         # # Add a selectbox to the sidebar:
