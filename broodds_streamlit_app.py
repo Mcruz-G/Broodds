@@ -88,7 +88,7 @@ def make_scatter_team_plot(plot_data, xcolumn, ycolumn, title
     #Complete the code 
     catamaran, catamaran2, robotto_regular, titulo = load_parameters()
     #Seteo los parametros del scatter
-    print(plot_data.columns)
+    # print(plot_data.columns)
     x, promx = plot_data[xcolumn], plot_data[xcolumn].mean() 
     y, promy = plot_data[ycolumn], plot_data[ycolumn].mean()
 
@@ -858,8 +858,8 @@ if __name__ == "__main__":
         st.dataframe(data[['Jornada','HomeGoals','AwayGoals','HomeTeamWins','AwayTeamWins','Draws']])
 
     if selected == '@Broodds Visuals':
-        # Scatter Plot 
-        pass
+        # # Scatter Plot 
+        # # pass
 
         # temporadas = df.Temporada.unique().tolist()[::-1]
         # # Add a selectbox to the sidebar:
