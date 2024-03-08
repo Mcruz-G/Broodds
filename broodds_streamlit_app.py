@@ -756,7 +756,7 @@ if __name__ == "__main__":
         data = data.sort_values(by='Offensive Superavit', ascending=False)
         data[['ranking', 'Jornada']] = data[['ranking', 'Jornada']].astype(int)
         data = data.rename(columns={'current_goals':'GF', 'current_exp_goals':'xG'})
-        # data['GF'] = data.apply(lambda row: round(row['GF'], 1), axis=1)
+        data['GF'] = data.apply(lambda row: round(row['GF'], 1), axis=1)
         if normalized:
             data['GF'] = data.apply(lambda row: row['GF'] / row['Jornada'], axis=1)
             data['xG'] = data.apply(lambda row: row['xG'] / row['Jornada'], axis=1)
@@ -797,7 +797,7 @@ if __name__ == "__main__":
         data = data.sort_values(by='Defensive Superavit', ascending=True)
         data[['ranking', 'Jornada']] = data[['ranking', 'Jornada']].astype(int)
         data = data.rename(columns={'current_goals_against':'GA', 'current_exp_goals_against':'xGA'})
-        # data['GA'] = data.apply(lambda row: round(row['GA'], 1), axis=1)
+        data['GA'] = data.apply(lambda row: round(row['GA'], 1), axis=1)
 
         if normalized:
             data['GA'] = data.apply(lambda row: row['GA'] / row['Jornada'], axis=1)
@@ -858,31 +858,31 @@ if __name__ == "__main__":
         st.dataframe(data[['Jornada','HomeGoals','AwayGoals','HomeTeamWins','AwayTeamWins','Draws']])
 
     if selected == '@Broodds Visuals':
-        # # Scatter Plot 
-        # # pass
+        # Scatter Plot 
+        # pass
 
-        # temporadas = df.Temporada.unique().tolist()[::-1]
-        # # Add a selectbox to the sidebar:
-        # temporada = st.selectbox(
-        #     'Select Season',
-        #     temporadas
-        # )
-        # xvars = ['xG','xGA', 'GF','GA']
-        # x_var = st.selectbox('Select X', xvars)
+        temporadas = df.Temporada.unique().tolist()[::-1]
+        # Add a selectbox to the sidebar:
+        temporada = st.selectbox(
+            'Select Season',
+            temporadas
+        )
+        xvars = ['xG','xGA', 'GF','GA']
+        x_var = st.selectbox('Select X', xvars)
 
-        # yvars = list(set(xvars) - set([x_var]))
-        # y_var = st.selectbox('Select Y', yvars)
+        yvars = list(set(xvars) - set([x_var]))
+        y_var = st.selectbox('Select Y', yvars)
 
-        # time.sleep(3)
+        time.sleep(3)
 
-        # columns = ['MetaEquipo',
-        #            'xG','xGA', 'GF','GA'
-        #            ]
+        columns = ['MetaEquipo',
+                   'xG','xGA', 'GF','GA'
+                   ]
         
-        # data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
-        # data = data.groupby('MetaEquipo').sum().reset_index()
+        data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
+        data = data.groupby('MetaEquipo').sum().reset_index()
 
-        # make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
+        make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
         
 
 
