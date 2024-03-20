@@ -859,30 +859,30 @@ if __name__ == "__main__":
 
     if selected == '@Broodds Visuals':
         # Scatter Plot 
-        # pass
+        pass
 # 
-        temporadas = df.Temporada.unique().tolist()[::-1]
+        # temporadas = df.Temporada.unique().tolist()[::-1]
         # Add a selectbox to the sidebar:
-        temporada = st.selectbox(
-            'Select Season',
-            temporadas
-        )
-        xvars = ['xG','xGA', 'GF','GA']
-        x_var = st.selectbox('Select X', xvars)
-# 
-        yvars = list(set(xvars) - set([x_var]))
-        y_var = st.selectbox('Select Y', yvars)
-# 
-        time.sleep(3)
-# 
-        columns = ['MetaEquipo',
-                   'xG','xGA', 'GF','GA'
-                   ]
-        # 
-        data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
-        data = data.groupby('MetaEquipo').sum().reset_index()
-# 
-        make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
+        # temporada = st.selectbox(
+            # 'Select Season',
+            # temporadas
+        # )
+        # xvars = ['xG','xGA', 'GF','GA']
+        # x_var = st.selectbox('Select X', xvars)
+
+        # yvars = list(set(xvars) - set([x_var]))
+        # y_var = st.selectbox('Select Y', yvars)
+
+        # time.sleep(3)
+
+        # columns = ['MetaEquipo',
+                #    'xG','xGA', 'GF','GA'
+                #    ]
+        
+        # data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
+        # data = data.groupby('MetaEquipo').sum().reset_index()
+
+        # make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
         
 
 
