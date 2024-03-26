@@ -120,6 +120,11 @@ def make_scatter_team_plot(plot_data, xcolumn, ycolumn, title
     ax.set_ylabel(ylabel, fontproperties=robotto_regular.prop,fontsize=18,color=color_plot)
     ax.set_title(f'{xlabel} Vs {ylabel} - {tournament}', fontproperties=robotto_regular.prop,
                         loc ='left', color=color_plot,fontsize = 25,fontweight="bold", pad=20)
+    if xlabel in ['xGA', 'GA']:
+        ax.invert_xaxis()
+    if ylabel in ['xGA', 'GA']:
+        ax.invert_yaxis()
+
 
     for index, row in plot_data.iterrows():
         x0, y0 = row[xcolumn], row[ycolumn]
@@ -861,28 +866,28 @@ if __name__ == "__main__":
         # Scatter Plot 
         pass
 # 
-        # temporadas = df.Temporada.unique().tolist()[::-1]
+        temporadas = df.Temporada.unique().tolist()[::-1]
         # Add a selectbox to the sidebar:
-        # temporada = st.selectbox(
-            # 'Select Season',
-            # temporadas
-        # )
-        # xvars = ['xG','xGA', 'GF','GA']
-        # x_var = st.selectbox('Select X', xvars)
-
-        # yvars = list(set(xvars) - set([x_var]))
-        # y_var = st.selectbox('Select Y', yvars)
-
-        # time.sleep(3)
-
-        # columns = ['MetaEquipo',
-                #    'xG','xGA', 'GF','GA'
-                #    ]
-        
-        # data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
-        # data = data.groupby('MetaEquipo').sum().reset_index()
-
-        # make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
+        temporada = st.selectbox(
+            'Select Season',
+            temporadas
+        )
+        xvars = ['xG','xGA', 'GF','GA']
+        x_var = st.selectbox('Select X', xvars)
+# 
+        yvars = list(set(xvars) - set([x_var]))
+        y_var = st.selectbox('Select Y', yvars)
+# 
+        time.sleep(3)
+# 
+        columns = ['MetaEquipo',
+                   'xG','xGA', 'GF','GA'
+                   ]
+        # 
+        data = df[(df.Temporada == temporada) & (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'})[columns]
+        data = data.groupby('MetaEquipo').sum().reset_index()
+# 
+        make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
         
 
 
