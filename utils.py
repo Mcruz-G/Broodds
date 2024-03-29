@@ -666,11 +666,11 @@ def season_analysis(df, season_stages, home_team, away_team):
     
     
     columns = ['MetaEquipo', 'ranking',
-            'current_goals','current_exp_goals', 'Jornada', 'Date', 'Venue'
+            'current_goals','current_exp_goals', 'Jornada', 'partidos_jugados', 'Date', 'Venue'
             ] if len(venue) == 2 else ['MetaEquipo', 'ranking',
-            'current_goals_home','current_exp_goals_home', 'Jornada', 'Date', 'Venue'
+            'current_goals_home','current_exp_goals_home', 'Jornada', 'partidos_jugados_home', 'Date', 'Venue'
             ] if 'Home' in venue else ['MetaEquipo', 'ranking',
-            'current_goals_away','current_exp_goals_away', 'Jornada', 'Date', 'Venue'
+            'current_goals_away','current_exp_goals_away', 'Jornada', 'partidos_jugados_away', 'Date', 'Venue'
             ]
     
 
@@ -679,23 +679,23 @@ def season_analysis(df, season_stages, home_team, away_team):
     
     if len(venue) == 1:
         if 'Home' in venue:
-            data = data.rename(columns={'current_goals_home' : 'current_goals', 'current_exp_goals_home': 'current_exp_goals'})
+            data = data.rename(columns={'current_goals_home' : 'current_goals', 'current_exp_goals_home': 'current_exp_goals', 'partidos_jugados_home':'partidos_jugados'})
             data = data[data.Venue == 'Home']
         else:
-            data = data.rename(columns={'current_goals_away' : 'current_goals', 'current_exp_goals_away': 'current_exp_goals'})
+            data = data.rename(columns={'current_goals_away' : 'current_goals', 'current_exp_goals_away': 'current_exp_goals', 'partidos_jugados_away':'partidos_jugados'})
             data = data[data.Venue == 'Away']
 
 
     data = data.sort_values(by='Date', ascending=False)
-    data = data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals':'max', 'current_exp_goals':'max', 'Jornada':'max'}).reset_index()
+    data = data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals':'max', 'current_exp_goals':'max', 'Jornada':'max', 'partidos_jugados':'max'}).reset_index()
     data['Offensive Superavit'] = data['current_goals'] - data['current_exp_goals']
     data = data.sort_values(by='Offensive Superavit', ascending=False)
-    data[['ranking', 'Jornada']] = data[['ranking', 'Jornada']].astype(int)
+    data[['ranking', 'Jornada', 'partidos_jugados']] = data[['ranking', 'Jornada', 'partidos_jugados']].astype(int)
     data = data.rename(columns={'current_goals':'GF', 'current_exp_goals':'xG'})
     # data['GF'] = data.apply(lambda row: round(row['GF'], 1), axis=1)
     if normalized:
-        data['GF'] = data.apply(lambda row: row['GF'] / row['Jornada'], axis=1)
-        data['xG'] = data.apply(lambda row: row['xG'] / row['Jornada'], axis=1)
+        data['GF'] = data.apply(lambda row: row['GF'] / row['partidos_jugados'], axis=1)
+        data['xG'] = data.apply(lambda row: row['xG'] / row['partidos_jugados'], axis=1)
     column_1.subheader("Offensive Superavit")
 
     match_filter = column_1.checkbox("Filter Match Teams")

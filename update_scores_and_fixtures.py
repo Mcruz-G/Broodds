@@ -120,14 +120,51 @@ def add_current_points(df):
     df.sort_values(by=['Temporada', 'SeasonStage', 'MetaEquipo', 'Jornada', 'Date'], inplace=True)
     # Inicializa las columnas 'current_points', 'current_wins' y 'current_goals' en NaN (espacios vacíos)
     df['current_points'] = ''
+    df['current_points_home'] = ''
+    df['current_points_away'] = ''
+    df['current_exp_points'] = ''
+    df['current_exp_points_home'] = ''
+    df['current_exp_points_away'] = ''
     df['current_wins'] = ''
+    df['current_wins_home'] = ''
+    df['current_wins_away'] = ''
+    df['current_draws'] = ''
+    df['current_draws_home'] = ''
+    df['current_draws_away'] = ''
+    df['current_losses'] = ''
+    df['current_losses_home'] = ''
+    df['current_losses_away'] = ''
     df['current_goals'] = ''
+    df['current_goals_home'] = ''
+    df['current_goals_away'] = ''
+    df['current_exp_goals'] = ''
+    df['current_exp_goals_away'] = ''
+    df['current_exp_goals_home'] = ''
+    df['current_goals_against'] = ''
+    df['current_goals_against_home'] = ''
+    df['current_goals_against_away'] = ''
+    df['current_exp_goals_against'] = ''
+    df['current_exp_goals_against_home'] = ''
+    df['current_exp_goals_against_away'] = ''
     df['current_ranking_points'] = ''
+    df['current_ranking_points_home'] = ''
+    df['current_ranking_points_away'] = ''
     df['current_ranking_wins'] = ''
+    df['current_ranking_wins_home'] = ''
+    df['current_ranking_wins_away'] = ''
     df['current_ranking_goals'] = ''
+    df['current_ranking_goals_home'] = ''
+    df['current_ranking_goals_away'] = ''
     df['current_ranking_score'] = ''
+    df['current_ranking_score_home'] = ''
+    df['current_ranking_score_away'] = ''
     df['current_goals_difference'] = ''
+    df['current_goals_difference_home'] = ''
+    df['current_goals_difference_away'] = ''
     df['ranking'] = ''
+    df['partidos_jugados'] = ''
+    df['partidos_jugados_home'] = ''
+    df['partidos_jugados_away'] = ''
 
 
     temporadas = df.Temporada.unique().tolist()
@@ -138,9 +175,38 @@ def add_current_points(df):
     for temp in temporadas:
         for stage in stages:
             puntos_acumulados = {}
+            puntos_acumulados_home = {}
+            puntos_acumulados_away = {}
+            exp_puntos_acumulados = {}
+            exp_puntos_acumulados_home = {}
+            exp_puntos_acumulados_away = {}
             wins_acumulados = {}
+            wins_acumulados_home = {}
+            wins_acumulados_away = {}
+            draws_acumulados = {}
+            draws_acumulados_home = {}
+            draws_acumulados_away = {}
+            losses_acumulados = {}
+            losses_acumulados_home = {}
+            losses_acumulados_away = {}
             goals_acumulados = {}
+            goals_acumulados_home = {}
+            goals_acumulados_away = {}
+            exp_goals_acumulados = {}
+            exp_goals_acumulados_home = {}
+            exp_goals_acumulados_away = {}
+            goals_against_acumulados = {}
+            goals_against_acumulados_home = {}
+            goals_against_acumulados_away = {}
+            exp_goals_against_acumulados = {}
+            exp_goals_against_acumulados_home = {}
+            exp_goals_against_acumulados_away = {}
             diferencia_goles_acumulados = {}
+            diferencia_goles_acumulados_home = {}
+            diferencia_goles_acumulados_away = {}
+            partidos_jugados = {}
+            partidos_jugados_home = {}
+            partidos_jugados_away = {}
             sample = df[(df.Temporada == temp) & (df.SeasonStage == stage)].sort_values(by='Date')
             
             for index, row in sample.iterrows():
@@ -149,28 +215,139 @@ def add_current_points(df):
                 # Verifica si el equipo ya está en el diccionario de puntos acumulados
                 if equipo not in puntos_acumulados:
                     puntos_acumulados[equipo] = 0
+                    puntos_acumulados_home[equipo] = 0
+                    puntos_acumulados_away[equipo] = 0
+                    exp_puntos_acumulados[equipo] = 0
+                    exp_puntos_acumulados_home[equipo] = 0
+                    exp_puntos_acumulados_away[equipo] = 0
                     wins_acumulados[equipo] = 0
+                    wins_acumulados_home[equipo] = 0
+                    wins_acumulados_away[equipo] = 0
+                    draws_acumulados[equipo] = 0
+                    draws_acumulados_home[equipo] = 0
+                    draws_acumulados_away[equipo] = 0
+                    losses_acumulados[equipo] = 0
+                    losses_acumulados_home[equipo] = 0
+                    losses_acumulados_away[equipo] = 0
                     goals_acumulados[equipo] = 0
+                    goals_acumulados_home[equipo] = 0
+                    goals_acumulados_away[equipo] = 0
+                    exp_goals_acumulados[equipo] = 0
+                    exp_goals_acumulados_home[equipo] = 0
+                    exp_goals_acumulados_away[equipo] = 0
+                    goals_against_acumulados[equipo] = 0
+                    goals_against_acumulados_home[equipo] = 0
+                    goals_against_acumulados_away[equipo] = 0
+                    exp_goals_against_acumulados[equipo] = 0
+                    exp_goals_against_acumulados_home[equipo] = 0
+                    exp_goals_against_acumulados_away[equipo] = 0
                     diferencia_goles_acumulados[equipo] = 0
+                    diferencia_goles_acumulados_home[equipo] = 0
+                    diferencia_goles_acumulados_away[equipo] = 0
+                    partidos_jugados[equipo] = 0
+                    partidos_jugados_home[equipo] = 0
+                    partidos_jugados_away[equipo] = 0
 
                 # Asigna los puntos según el resultado del partido
+                if row['Venue'] == 'Home':
+                    partidos_jugados_home[equipo] += 1
+                    goals_acumulados_home[equipo] += row['GF']
+                    goals_against_acumulados_home[equipo] += row['GA']
+                    exp_goals_acumulados_home[equipo] += row['xG']
+                    exp_goals_against_acumulados_home[equipo] += row['xGA']
+                    diferencia_goles_acumulados_home[equipo] += row['GF'] - row['GA']
+                else:
+                    partidos_jugados_away[equipo] += 1
+                    goals_acumulados_away[equipo] += row['GF']
+                    goals_against_acumulados_away[equipo] += row['GA']
+                    exp_goals_acumulados_away[equipo] += row['xG']
+                    exp_goals_against_acumulados_away[equipo] += row['xGA']
+                    diferencia_goles_acumulados_away[equipo] += row['GF'] - row['GA']
+
                 if row['Result'] == 'W':
                     puntos_acumulados[equipo] += 3
                     wins_acumulados[equipo] += 1
+                    if row['Venue'] == 'Home':
+                        puntos_acumulados_home[equipo] += 3
+                        wins_acumulados_home[equipo] += 1
+                        
+                    else:
+                        puntos_acumulados_away[equipo] += 3
+                        wins_acumulados_away[equipo] += 1
+
 
                 elif row['Result'] == 'D':
                     puntos_acumulados[equipo] += 1
+                    draws_acumulados[equipo] += 1
+                    if row['Venue'] == 'Home':
+                        puntos_acumulados_home[equipo] += 1
+                        draws_acumulados_home[equipo] += 1
+                    else:
+                        puntos_acumulados_away[equipo] += 1
+                        draws_acumulados_away[equipo] += 1
+                else:
+                    losses_acumulados[equipo] += 1
+                    if row['Venue'] == 'Home':
+                        losses_acumulados_home[equipo] += 1
+                    else:
+                        losses_acumulados_away[equipo] += 1
+                
+                if row['Expected_Results'] == "W":
+                    exp_puntos_acumulados[equipo] += 3
+                    if row['Venue'] == 'Home':
+                        exp_puntos_acumulados_home[equipo] += 3
+                    else:
+                        exp_puntos_acumulados_away[equipo] += 3
+                elif row['Expected_Results'] == "D":
+                    exp_puntos_acumulados[equipo] += 1
+                    if row['Venue'] == 'Home':
+                        exp_puntos_acumulados_home[equipo] += 1
+                    else:
+                        exp_puntos_acumulados_away[equipo] += 1
 
                 # Suma los goles
+                partidos_jugados[equipo] += 1
                 goals_acumulados[equipo] += row['GF']
+                exp_goals_acumulados[equipo] += row['xG']
+                goals_against_acumulados[equipo] += row['GA']
+                exp_goals_against_acumulados[equipo] += row['xGA']
                 diferencia_goles_acumulados[equipo] += row['GF'] - row['GA']
 
                 # Asigna los valores acumulados a las columnas correspondientes
                 sample.at[index, 'current_points'] = puntos_acumulados[equipo]
+                sample.at[index, 'current_points_home'] = puntos_acumulados_home[equipo]
+                sample.at[index, 'current_points_away'] = puntos_acumulados_away[equipo]
+                sample.at[index, 'current_exp_points'] = exp_puntos_acumulados[equipo]
+                sample.at[index, 'current_exp_points_home'] = exp_puntos_acumulados_home[equipo]
+                sample.at[index, 'current_exp_points_away'] = exp_puntos_acumulados_away[equipo]
                 sample.at[index, 'current_wins'] = wins_acumulados[equipo]
+                sample.at[index, 'current_wins_home'] = wins_acumulados_home[equipo]
+                sample.at[index, 'current_wins_away'] = wins_acumulados_away[equipo]
+                sample.at[index, 'current_draws'] = draws_acumulados[equipo]
+                sample.at[index, 'current_draws_home'] = draws_acumulados_home[equipo]
+                sample.at[index, 'current_draws_away'] = draws_acumulados_away[equipo]
+                sample.at[index, 'current_losses'] = losses_acumulados[equipo]
+                sample.at[index, 'current_losses_home'] = losses_acumulados_home[equipo]
+                sample.at[index, 'current_losses_away'] = losses_acumulados_away[equipo]
                 sample.at[index, 'current_goals'] = goals_acumulados[equipo]
+                sample.at[index, 'current_goals_home'] = goals_acumulados_home[equipo]
+                sample.at[index, 'current_goals_away'] = goals_acumulados_away[equipo]
+                sample.at[index, 'current_exp_goals'] = exp_goals_acumulados[equipo]
+                sample.at[index, 'current_exp_goals_home'] = exp_goals_acumulados_home[equipo]
+                sample.at[index, 'current_exp_goals_away'] = exp_goals_acumulados_away[equipo]
+                sample.at[index, 'current_goals_against'] = goals_against_acumulados[equipo]
+                sample.at[index, 'current_goals_against_home'] = goals_against_acumulados_home[equipo]
+                sample.at[index, 'current_goals_against_away'] = goals_against_acumulados_away[equipo]
+                sample.at[index, 'current_exp_goals_against'] = exp_goals_against_acumulados[equipo]
+                sample.at[index, 'current_exp_goals_against_home'] = exp_goals_against_acumulados_home[equipo]
+                sample.at[index, 'current_exp_goals_against_away'] = exp_goals_against_acumulados_away[equipo]
                 sample.at[index, 'current_goals_difference'] = diferencia_goles_acumulados[equipo]
-                
+                sample.at[index, 'current_goals_difference_home'] = diferencia_goles_acumulados_home[equipo]
+                sample.at[index, 'current_goals_difference_away'] = diferencia_goles_acumulados_away[equipo]
+                sample.at[index, 'partidos_jugados'] = partidos_jugados[equipo]
+                sample.at[index, 'partidos_jugados_home'] = partidos_jugados_home[equipo]
+                sample.at[index, 'partidos_jugados_away'] = partidos_jugados_away[equipo]
+            
 
             for jornada in jornadas:
                 subsample = sample[sample.Jornada == jornada]
@@ -179,6 +356,34 @@ def add_current_points(df):
                 sample.loc[subsample.index] = subsample
                 
             df.loc[sample.index] = sample
+    
+    name_mapping = {
+    'America' : 'América',
+    'Atlas' : 'Atlas',
+    'Atletico' : 'Atlético',
+    'Cruz_Azul' : 'Cruz Azul',
+    'FC_Juarez' : 'FC Juárez',
+    'Guadalajara' : 'Guadalajara',
+    'Leon' : 'León',
+    'Mazatlan' : 'Mazatlán',
+    'Monterrey' : 'Monterrey',
+    'Necaxa' : 'Necaxa',
+    'Pachuca' : 'Pachuca',
+    'Puebla' : 'Puebla',
+    'Pumas_UNAM' : 'UNAM',
+    'Queretaro' : 'Querétaro',
+    'Santos_Laguna' : 'Santos',
+    'Tijuana' : 'Tijuana',
+    'Toluca' : 'Toluca',
+    'UANL' : 'UANL',
+}
+
+
+    aux_df = df[['Date','MetaEquipo','ranking']]
+    aux_df = aux_df.rename(columns={'MetaEquipo':'Opponent', 'ranking':'opponent_ranking'})
+    aux_df['Opponent'] = aux_df['Opponent'].apply(lambda x: name_mapping[x])
+
+    df = df.merge(aux_df, on=['Date','Opponent'], how='left')
     return df
 
 def add_columns(df):
@@ -257,7 +462,7 @@ def read_scores_and_fixture_db():
 
 if __name__ == '__main__':
     metadata = pd.read_csv("data/csvdata/metadata.csv")
-    update_scores_and_features(metadata, current_season='2023-2024')
+    # update_scores_and_features(metadata, current_season='2023-2024')
     df = read_scores_and_fixture_db()
     df = data_cleaning(df)
     df = add_columns(df)
