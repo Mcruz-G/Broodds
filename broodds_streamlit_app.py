@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     set_streamlit_config()
 
-    over_line, cells_format = initial_layout()        
+    over_line, cells_format, n_games = initial_layout()        
 
     home_team, away_team = team_selection_layout(scores_and_fixtures_df)
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         historic_match_results(scores_and_fixtures_df, home_team, away_team, over_line, season_stages, cells_format)
     
     if selected == 'Team Analysis':
-        team_analysis(scores_and_fixtures_df, home_team, away_team, over_line, season_stages, cells_format)
+        team_analysis(scores_and_fixtures_df, home_team, away_team, over_line, season_stages, cells_format, n_games)
     
     if selected == 'Home Team Goals Analysis':
         home_team_goal_analysis(scores_and_fixtures_df, home_team, over_line, season_stages)
