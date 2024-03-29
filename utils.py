@@ -148,7 +148,6 @@ def color_gradient(val, df, reference_col, reverse_color_scale=False):
 def plot_pie_chart(results_dict, colors, title=None):
     # Create a dark background
     # Color mapping for each result type
-    
     # Create a pie chart
     labels = list(results_dict.keys())
     sizes = list(results_dict.values())
@@ -443,7 +442,7 @@ def historic_match_results(df, home_team, away_team, over_line, season_stages, h
             
             # Last 10 Match Results
             st.subheader(f"Last 10 {home_team} vs {away_team} Match Results")
-            last_10_match_data = df[(df.MetaEquipo == home_team) & (df.Opponent == away_team)& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
+            last_10_match_data = df[(df.MetaEquipo == home_team) & (df.Opponent == away_team)& (df.SeasonStage.isin(season_stages)) ].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
             show_pie_charts(last_10_match_data, over_line, subheader=f"Last 10 {home_team} vs {away_team} Match Results")
                 
             
@@ -473,7 +472,7 @@ def historic_match_results(df, home_team, away_team, over_line, season_stages, h
 
 def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_cells):
             st.header(f"{home_team} Analysis")
-            match_data = df[(df.MetaEquipo == home_team) & (df.Venue == 'Home')& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
+            match_data = df[(df.MetaEquipo == home_team) & (df.Venue == 'Home')& (df.SeasonStage.isin(season_stages))& (df.Temporada == '2023-2024')].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
             st.subheader(f"{home_team}'s Historic Results at Home")
             show_pie_charts(match_data, over_line, subheader=f"{home_team}'s Historic Results at Home")
             
@@ -482,8 +481,8 @@ def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_
             st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
 
             # Last 10 home_team match results
-            last_10_match_data = df[(df.MetaEquipo == home_team)& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
-            st.subheader(f"Last 10 {home_team} Match Results")
+            last_10_match_data = df[(df.MetaEquipo == home_team)& (df.SeasonStage.isin(season_stages))& (df.Temporada == '2023-2024')].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
+            st.subheader(f"All {home_team}'s Match Results from Season 2023-2024")
             show_pie_charts(last_10_match_data,over_line, subheader=f"Last 10 {home_team} Match Results")
             
             
@@ -495,7 +494,7 @@ def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_
             
             # Last 10 home_team match results in the corresponding venue
             st.subheader(f"Last 10 {home_team} Match Results at Home")
-            last_10_match_data = df[(df.MetaEquipo == home_team) & (df.Venue == 'Home')& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
+            last_10_match_data = df[(df.MetaEquipo == home_team) & (df.Venue == 'Home')& (df.SeasonStage.isin(season_stages))& (df.Temporada == '2023-2024')].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
             show_pie_charts(last_10_match_data,over_line, subheader=f"Last 10 {home_team} Match Results at Home")
             
             
@@ -533,8 +532,8 @@ def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_
             st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
 
             # Last 10 away_team match results
-            last_10_match_data = df[(df.MetaEquipo == inverse_name_mapping[away_team])& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
-            st.subheader(f"Last 10 {away_team} Match Results")
+            last_10_match_data = df[(df.MetaEquipo == inverse_name_mapping[away_team])& (df.SeasonStage.isin(season_stages)) & (df.Temporada == '2023-2024')].dropna(subset={'Result'}).sort_values(by='Date', ascending=True)
+            st.subheader(f"All {away_team}'s Match Results from Season 2023-2024")
             show_pie_charts(last_10_match_data,over_line, subheader=f"Last 10 {away_team} Match Results")
             
             
