@@ -462,7 +462,7 @@ def read_scores_and_fixture_db():
 
 if __name__ == '__main__':
     metadata = pd.read_csv("data/csvdata/metadata.csv")
-    # update_scores_and_features(metadata, current_season='2023-2024')
+    update_scores_and_features(metadata, current_season='2023-2024')
     df = read_scores_and_fixture_db()
     df = data_cleaning(df)
     df = add_columns(df)
