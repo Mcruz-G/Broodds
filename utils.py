@@ -498,16 +498,7 @@ def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_
             show_df = match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
             st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
 
-            st.subheader(f"Last N {home_team}'s Match Results from Season 2023-2024")
-            # Last 10 home_team match results
-            last_10_match_data = df[(df.MetaEquipo == home_team)& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(n_games)
-            show_pie_charts(last_10_match_data,over_line, subheader=f"Last N {home_team}'s Match Results from Season 2023-2024")
             
-            
-            show_df = last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
-            st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
-
-
 
             st.header(f"{away_team} Analysis")
             
@@ -536,15 +527,7 @@ def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_
             show_df = match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
             st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
 
-            st.subheader(f"Last N {away_team}'s Match Results from Season 2023-2024")
-            # Last 10 away_team match results
-            last_10_match_data = df[(df.MetaEquipo == inverse_name_mapping[away_team])& (df.SeasonStage.isin(season_stages)) & (df.Temporada == '2023-2024')].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(n_games)
-            show_pie_charts(last_10_match_data,over_line, subheader=f"Last N games {away_team}'s Match Results from Season 2023-2024")
             
-            
-            show_df = last_10_match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
-            st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
-
     
            
 def home_team_goal_analysis(df, home_team, over_line, season_stages):
