@@ -153,7 +153,7 @@ def plot_pie_chart(results_dict, colors, title=None):
     sizes = list(results_dict.values())
 
     fig, ax = plt.subplots()
-
+    
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=[colors[result] for result in labels],
             wedgeprops={'edgecolor': 'white'},  # White edge color
         textprops={'color': 'white', 'size':15},
@@ -508,7 +508,7 @@ def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_
                                         ['Home', 'Away'],
                                         ['Home', 'Away'])
             match_data = df[(df.MetaEquipo == away_team) & (df.Venue.isin(venue))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(n_games)
-            show_pie_charts(match_data, over_line, subheader=f"{away_team}'s Historic Results at Home")
+            show_pie_charts(match_data, over_line, subheader=f"{away_team}'s Historic Results")
             
             show_df = match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
             st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
