@@ -650,66 +650,70 @@ def season_analysis(df, season_stages, home_team, away_team):
             data = data.rename(columns={'current_goals_away' : 'current_goals', 'current_exp_goals_away': 'current_exp_goals', 'partidos_jugados_away':'partidos_jugados'})
             data = data[data.Venue == 'Away']
 
+    offensive_data = data.copy()
 
-    data = data.sort_values(by='Date', ascending=False)
-    data = data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals':'max', 'current_exp_goals':'max', 'Jornada':'max', 'partidos_jugados':'max'}).reset_index()
-    data['Offensive Superavit'] = data['current_goals'] - data['current_exp_goals']
-    data = data.sort_values(by='Offensive Superavit', ascending=False)
-    data[['ranking', 'Jornada', 'partidos_jugados']] = data[['ranking', 'Jornada', 'partidos_jugados']].astype(int)
-    data = data.rename(columns={'current_goals':'GF', 'current_exp_goals':'xG'})
-    # data['GF'] = data.apply(lambda row: round(row['GF'], 1), axis=1)
+    offensive_data = offensive_data.sort_values(by='Date', ascending=False)
+    offensive_data = offensive_data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals':'max', 'current_exp_goals':'max', 'Jornada':'max', 'partidos_jugados':'max'}).reset_index()
+    offensive_data['Offensive Superavit'] = offensive_data['current_goals'] - offensive_data['current_exp_goals']
+    offensive_data = offensive_data.sort_values(by='Offensive Superavit', ascending=False)
+    offensive_data[['ranking', 'Jornada', 'partidos_jugados']] = offensive_data[['ranking', 'Jornada', 'partidos_jugados']].astype(int)
+    offensive_data = offensive_data.rename(columns={'current_goals':'GF', 'current_exp_goals':'xG'})
+    # offensive_data['GF'] = offensive_data.apply(lambda row: round(row['GF'], 1), axis=1)
     if normalized:
-        data['GF'] = data.apply(lambda row: row['GF'] / row['partidos_jugados'], axis=1)
-        data['xG'] = data.apply(lambda row: row['xG'] / row['partidos_jugados'], axis=1)
+        offensive_data['GF'] = offensive_data.apply(lambda row: row['GF'] / row['partidos_jugados'], axis=1)
+        offensive_data['xG'] = offensive_data.apply(lambda row: row['xG'] / row['partidos_jugados'], axis=1)
     column_1.subheader("Offensive Superavit")
 
     match_filter = column_1.checkbox("Filter Match Teams")
 
     if match_filter:
-        data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
+        offensive_data = offensive_data[offensive_data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
     
     
     
-    column_1.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Offensive Superavit'), subset=['Offensive Superavit']).format("{:.2f}", subset=['xG', 'GF', 'Offensive Superavit']))
+    column_1.dataframe(offensive_data.style.applymap(lambda x: color_gradient(x, offensive_data, 'Offensive Superavit'), subset=['Offensive Superavit']).format("{:.2f}", subset=['xG', 'GF', 'Offensive Superavit']))
 
 
     
     columns = ['MetaEquipo', 'ranking',
-            'current_goals_against','current_exp_goals_against', 'Jornada','Date', 'Venue'
+            'current_goals_against','current_exp_goals_against', 'Jornada', 'partidos_jugados', 'Date', 'Venue'
             ] if len(venue) == 2 else ['MetaEquipo', 'ranking',
-            'current_goals_against_home','current_exp_goals_against_home', 'Jornada','Date', 'Venue'
+            'current_goals_against_home','current_exp_goals_against_home', 'Jornada', 'partidos_jugados_home', 'Date', 'Venue'
             ] if 'Home' in venue else ['MetaEquipo', 'ranking',
-            'current_goals_against_away','current_exp_goals_against_away', 'Jornada','Date', 'Venue'
+            'current_goals_against_away','current_exp_goals_against_away', 'Jornada', 'partidos_jugados_away', 'Date', 'Venue'
             ]
 
+    
     data = df[(df.Temporada == temporada) & (df.SeasonStage == stage)& (df.Jornada <= jornada)][columns]
 
     if len(venue) == 1:
+
         if 'Home' in venue:
-            data = data.rename(columns={'current_goals_against_home' : 'current_goals_against', 'current_exp_goals_against_home': 'current_exp_goals_against'})
+            data = data.rename(columns={'current_goals_against_home' : 'current_goals_against', 'current_exp_goals_against_home': 'current_exp_goals_against', 'partidos_jugados_home':'partidos_jugados'})
             data = data[data.Venue == 'Home']
         else:
-            data = data.rename(columns={'current_goals_against_away' : 'current_goals_against', 'current_exp_goals_against_away': 'current_exp_goals_against'})
+            data = data.rename(columns={'current_goals_against_away' : 'current_goals_against', 'current_exp_goals_against_away': 'current_exp_goals_against', 'partidos_jugados_away':'partidos_jugados'})
             data = data[data.Venue == 'Away']
-    
-    data = data.sort_values(by='Date', ascending=False)
-    data = data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals_against':'max', 'current_exp_goals_against':'max', 'Jornada':'max'}).reset_index()
-    data['Defensive Superavit'] = data['current_goals_against'] - data['current_exp_goals_against']
-    data = data.sort_values(by='Defensive Superavit', ascending=True)
-    data[['ranking', 'Jornada']] = data[['ranking', 'Jornada']].astype(int)
-    data = data.rename(columns={'current_goals_against':'GA', 'current_exp_goals_against':'xGA'})
+
+    defensive_data = data.copy()
+    defensive_data = defensive_data.sort_values(by='Date', ascending=False)
+    defensive_data = defensive_data.groupby('MetaEquipo').agg({'ranking':'first', 'current_goals_against':'max', 'current_exp_goals_against':'max', 'Jornada':'max','partidos_jugados':'max'}).reset_index()
+    defensive_data['Defensive Superavit'] = defensive_data['current_goals_against'] - defensive_data['current_exp_goals_against']
+    defensive_data = defensive_data.sort_values(by='Defensive Superavit', ascending=True)
+    defensive_data[['ranking', 'Jornada',  'partidos_jugados']] = defensive_data[['ranking', 'Jornada',  'partidos_jugados']].astype(int)
+    defensive_data = defensive_data.rename(columns={'current_goals_against':'GA', 'current_exp_goals_against':'xGA'})
     # data['GA'] = data.apply(lambda row: round(row['GA'], 1), axis=1)
 
     if normalized:
-        data['GA'] = data.apply(lambda row: row['GA'] / row['Jornada'], axis=1)
-        data['xGA'] = data.apply(lambda row: row['xGA'] / row['Jornada'], axis=1)
+        defensive_data['GA'] = defensive_data.apply(lambda row: row['GA'] / row['partidos_jugados'], axis=1)
+        defensive_data['xGA'] = defensive_data.apply(lambda row: row['xGA'] / row['partidos_jugados'], axis=1)
     column_2.subheader("Defensive Superavit")
     
     match_filter = column_2.checkbox("Filter Match Teams ")
     
     if match_filter:
-        data = data[data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
-    column_2.dataframe(data.style.applymap(lambda x: color_gradient(x, data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']).format("{:.2f}", subset=['xGA','GA', 'Defensive Superavit']))
+        defensive_data = defensive_data[defensive_data.MetaEquipo.isin([home_team, inverse_name_mapping[away_team]])]
+    column_2.dataframe(defensive_data.style.applymap(lambda x: color_gradient(x, defensive_data, 'Defensive Superavit', reverse_color_scale=True), subset=['Defensive Superavit']).format("{:.2f}", subset=['xGA','GA', 'Defensive Superavit']))
     
     st.markdown("---")
     st.subheader("Real vs Expected")
