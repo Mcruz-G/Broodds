@@ -623,9 +623,24 @@ def season_analysis(df, season_stages, home_team, away_team):
         'Select Jornada',
         jornadas
     )
+
+    venue = st.multiselect(             'Select Venue        ',
+                                        ['Home', 'Away'],
+                                        ['Home', 'Away'])
     
-    columns = ['Date','Temporada','MetaEquipo','ranking','current_points','current_goals','current_goals_against','current_goals_difference','current_wins','current_losses','current_draws']
-    st.dataframe(df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == jornada)][columns].sort_values(by='ranking'))
+    
+
+    if len(venue) == 2:
+        columns = ['Date','Temporada','MetaEquipo','ranking','current_points','current_goals','current_goals_against','current_goals_difference','current_wins','current_losses','current_draws']
+    else:
+         
+        if "Home" in venue:
+            columns = ['Date','Temporada','MetaEquipo','ranking','current_points_home','current_goals_home','current_goals_against_home','current_goals_difference_home','current_wins_home','current_losses_home','current_draws_home']
+        else:
+            columns = ['Date','Temporada','MetaEquipo','ranking','current_points_away','current_goals_away','current_goals_against_away','current_goals_difference_away','current_wins_away','current_losses_away','current_draws_away']
+
+    data = df[(df.Temporada == temporada) & (df.SeasonStage == stage) & (df.Jornada == jornada)][columns].sort_values(by='ranking')
+    st.dataframe(data)
     
     st.markdown("---")
     column_1, column_2, column_3 = st.columns(3)
