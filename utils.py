@@ -497,6 +497,18 @@ def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_
             
             show_df = match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
             st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
+            
+            st.subheader(f"{home_team}'s Last 10 Games")
+            venue = st.multiselect(
+                                        'Select Venue    ',
+                                        ['Home', 'Away'],
+                                        ['Home', 'Away'])
+            match_data = df[(df.MetaEquipo == home_team) & (df.Venue.isin(venue))& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
+            show_pie_charts(match_data, over_line, subheader=f"{home_team}'s Historic Results")
+            
+            
+            show_df = match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
+            st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
 
             
 
@@ -527,7 +539,18 @@ def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_
             show_df = match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
             st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
 
+            st.subheader(f"{away_team}'s Last 10 Games")
+            venue = st.multiselect(
+                                        'Select Venue      ',
+                                        ['Home', 'Away'],
+                                        ['Home', 'Away'])
+            match_data = df[(df.MetaEquipo == away_team) & (df.Venue.isin(venue))& (df.SeasonStage.isin(season_stages))].dropna(subset={'Result'}).sort_values(by='Date', ascending=True).tail(10)
+            show_pie_charts(match_data, over_line, subheader=f"{away_team}'s Historic Results")
             
+            
+            show_df = match_data[['Date','MetaEquipo','Opponent','Venue', 'Result', 'GF', 'GA', 'xG', 'xGA', 'SeasonStage','GF_>0 & GA_>0',f'TotalGoals_>{over_line}']].sort_values(by='Date', ascending=False)
+            st.dataframe(show_df.style.apply(lambda x: highlight_cells(x), axis=1, subset=['Result', 'GF_>0 & GA_>0', f'TotalGoals_>{over_line}']))
+
     
            
 def home_team_goal_analysis(df, home_team, over_line, season_stages):
