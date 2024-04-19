@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import math
 import time
 import os
+import pandas as pd
 from matplotlib.offsetbox import (OffsetImage,AnnotationBbox)
 from mplsoccer import FontManager
 from PIL import Image
@@ -69,6 +70,10 @@ def load_parameters():
     titulo = FontManager(URL4)
     return catamaran, catamaran2, robotto_regular, titulo
 
+
+def metric_time_series_by_Jornada(plot_data):
+     return
+     
 
 def make_scatter_team_plot(plot_data, xcolumn, ycolumn, title
                            , xlabel='Atributo 1'
@@ -408,7 +413,7 @@ def sidebar_layout():
                 menu_title="Hello BroOdder!",
                 options=['Historic Match Results', 'Team Analysis', 'Goals Analysis',
                         'Home Team Goals Analysis', 'Away Team Goals Analysis', 
-                        'Season Analysis', '@Broodds Visuals'],
+                        'Season Analysis', 'Big Picture'],
             )
         return selected
 def historic_match_results(df, home_team, away_team, over_line, season_stages, highlight_cells):
@@ -799,7 +804,66 @@ def season_analysis(df, season_stages, home_team, away_team):
 
 
     st.dataframe(data[['Jornada','HomeGoals','AwayGoals','HomeTeamWins','AwayTeamWins','Draws']])
+
+def big_picture(df, season_stages):
+
+    columns = ['Temporada','SeasonStage', 'Season Type', 'Jornada','MetaEquipo', 'Opponent','Venue', 'Result', 'GF', 'GA','xG', 'xGA',  'GoalsDifference',  'TotalGoals',
+               'GF_>0 & GA_>0','current_points']
+    data = df[columns].copy()
+    data['Total games'] = 1
+
+    venues = df.Venue.unique().tolist()
+    venues = st.multiselect(
+                                        'Select Venue',
+                                        venues,
+                                        venues
+                                        )
     
+    team_filter = st.checkbox('Wanna filter by team?')
+    if team_filter:
+        teams = df.MetaEquipo.unique().tolist()
+        print(len(teams))
+        teams = st.multiselect("Select Team", teams)
+        data = data[data.MetaEquipo.isin(teams)]
+
+
+    data = data[data.Venue.isin(venues)]
+    data['win_rate'] = data.apply(lambda row: 1 if row['Result'] == 'W' else 0, axis=1)
+    data['loss_rate'] = data.apply(lambda row: 1 if row['Result'] == 'L' else 0, axis=1)
+    data['draw_rate'] = data.apply(lambda row: 1 if row['Result'] == 'D' else 0, axis=1)
+
+    if 'Liguilla' not in season_stages:     
+
+        data = data[data.SeasonStage.isin(season_stages)].dropna(subset={'Jornada'})
+        grouping_columns = ['SeasonStage', 'Jornada', 'MetaEquipo']
+        data = data.groupby(by=grouping_columns).agg(
+             {'GF':'mean', 'GA':'mean','xG':'mean', 'xGA':'mean',  'GoalsDifference':'mean',  'TotalGoals':'mean',
+               'GF_>0 & GA_>0':'mean','win_rate':'mean', 'loss_rate':'mean', 'draw_rate':'mean', 'Total games':'sum'}).reset_index()
+    else:
+        season_types = df[df['SeasonStage'].isin(['Liguilla'])]['Season Type'].unique().tolist()
+        season_types = st.multiselect('Select Season Type', season_types, ['Quarter-finals', 'Semi-finals', 'Finals'])
+        print(season_types)
+        print(season_stages)
+        grouping_columns = ['SeasonStage', 'Season Type', 'MetaEquipo']
+
+        data = data[(data.SeasonStage.isin(['Liguilla']))&(data['Season Type'].isin(season_types))]
+        data = data.drop('Jornada', axis=1)
+        data = data.groupby(by=grouping_columns).agg(
+             {'GF':'mean', 'GA':'mean','xG':'mean', 'xGA':'mean',  'GoalsDifference':'mean',  'TotalGoals':'mean',
+               'GF_>0 & GA_>0':'mean','win_rate':'mean', 'loss_rate':'mean', 'draw_rate':'mean', 'Total games':'sum'}
+        ).reset_index().sort_values(by='Total games')
+
+    st.dataframe(data)
+
+def read_scores_and_fixtures():
+    df = pd.read_csv("data/csvdata/scores_and_fixtures.csv").iloc[:,1:]
+    
+    df.loc[df[df['Season Type'].isin(['Quarter-finals', 'Semi-finals', 'Finals', '7-seed match', '8-seed match', '9/10 match'])].index, 'SeasonStage'] = 'Liguilla'
+#  df['SeasonStage'] = df.apply(lambda row: 'Liguilla' if row['Season Type'].isin([['Quarter-finals', 'Semi-finals', 'Finals', '7-seed match', '8-seed match', '9/10 match']]) else row['SeasonStage'], axis=1)
+    df['Jornada'] = df[df['Season Type'] == 'Regular Season'].groupby(['MetaEquipo', 'Temporada', 'SeasonStage'])['Date'].rank(method='dense', ascending=True).astype(int)
+    
+    return df
+   
 def scatterplot(df, season_stages):
 
         temporadas = df.Temporada.unique().tolist()[::-1]

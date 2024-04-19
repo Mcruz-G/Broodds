@@ -4,10 +4,12 @@ import streamlit as st
 
 from utils import *
 
-scores_and_fixtures_df = pd.read_csv("data/csvdata/scores_and_fixtures.csv").iloc[:,1:]
+scores_and_fixtures_df = read_scores_and_fixtures()
+
 
 if __name__ == "__main__":
-
+    
+    
     set_streamlit_config()
 
     over_line, cells_format, n_games = initial_layout()        
@@ -36,6 +38,8 @@ if __name__ == "__main__":
     if selected == 'Season Analysis':
         season_analysis(scores_and_fixtures_df, season_stages, home_team, away_team)
 
+    if selected == 'Big Picture':
+        big_picture(scores_and_fixtures_df, season_stages)
 
     # You can add more content below the columns
     st.markdown("---")
