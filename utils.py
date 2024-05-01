@@ -860,8 +860,8 @@ def read_scores_and_fixtures():
     
     df.loc[df[df['Season Type'].isin(['Quarter-finals', 'Semi-finals', 'Finals', '7-seed match', '8-seed match', '9/10 match'])].index, 'SeasonStage'] = 'Liguilla'
 #  df['SeasonStage'] = df.apply(lambda row: 'Liguilla' if row['Season Type'].isin([['Quarter-finals', 'Semi-finals', 'Finals', '7-seed match', '8-seed match', '9/10 match']]) else row['SeasonStage'], axis=1)
-    df['Jornada'] = df[df['Season Type'] == 'Regular Season'].groupby(['MetaEquipo', 'Temporada', 'SeasonStage'])['Date'].rank(method='dense', ascending=True).astype(int)
-    
+    df['Jornada'] = df[(df['Season Type'] == 'Regular Season')& (df['SeasonStage'].isin(['Clausura', 'Apertura']))].groupby(['MetaEquipo', 'Temporada', 'SeasonStage'])['Date'].rank(method='dense', ascending=True).astype(int)
+    df['Jornada'] = df['Jornada'].fillna('-')
     return df
    
 def scatterplot(df, season_stages):
