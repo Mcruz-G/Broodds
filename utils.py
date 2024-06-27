@@ -959,4 +959,5 @@ def scatterplot(df, season_stages):
         data = data.groupby('MetaEquipo').sum().reset_index()
 # 
         make_scatter_team_plot(data, xcolumn=x_var,ycolumn= y_var, title="", xlabel=x_var, ylabel=y_var, zoom=0.063)
-                
+
+
