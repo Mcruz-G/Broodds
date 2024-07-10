@@ -53,7 +53,7 @@ def fbref_pull_and_store_data(metadata):
 
             print(f"Descargando datos de {tabla_nombre}, Temporada: {temporada} desde {link}")
             
-            time.sleep(1)  # Espera 1 segundo entre cada solicitud
+            time.sleep(3)  # Espera 1 segundo entre cada solicitud
             datos_tabla = pd.read_html(link)
             datos_tabla = datos_tabla[1]
             datos_tabla['Temporada'] = temporada  # Agregar la temporada como columna
