@@ -499,7 +499,7 @@ def historic_match_results(df, home_team, away_team, over_line, season_stages, h
             st.markdown("---")
 
 def team_analysis(df, home_team, away_team, over_line, season_stages, highlight_cells, n_games):
-            st.header("Select the home team and watch the analysis")
+            st.header("Select the home team and watch the analysis:")
             st.header(f"{home_team} Analysis")
             
             st.subheader(f"{home_team}'s Last N Results ")
