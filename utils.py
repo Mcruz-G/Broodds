@@ -969,9 +969,9 @@ def multiple_simultaneous_kelly(bets_data, alpha, max_iter):
     return value_var, fs_var
 
 # bets_data
-def display_bank_percentages(df_betting):
+def display_bank_percentages(df_betting, betting_data):
     total_bank = float(st.text_input("How much bank % will you allocate to this portfolio? Expresse it as a number between [0,1])", 1))
-    expected_portfolio_value, portfolio_weights = multiple_simultaneous_kelly(df_betting, alpha=1, max_iter=int(1e8))
+    expected_portfolio_value, portfolio_weights = multiple_simultaneous_kelly(betting_data, alpha=1, max_iter=int(1e8))
     df_betting['% de bank'] = portfolio_weights
     df_betting['% de bank'] *= total_bank
     df_betting['% de bank'] = df_betting['% de bank'].apply(lambda row: np.round(row, 2))
@@ -985,14 +985,13 @@ def betting():
     uploaded_file = st.file_uploader("Upload your bets in a csv file", type="csv")
 
     if uploaded_file is not None:
-        try:
-            # Read the CSV file into a DataFrame
-            betting_data = pd.read_csv(uploaded_file)
-            display_bank_percentages(betting_data)
+        # Read the CSV file into a DataFrame
+        df = pd.read_csv(uploaded_file).iloc[:,1:]
+        bet_names = df.apuesta.tolist()
+        betting_data = [item for item in zip(df.probabilidad.tolist(), df.momio.tolist())]
+
+        display_bank_percentages(df,betting_data)
             
-            # Return the DataFrame for further processing
-        except Exception as e:
-            st.error(f"Error reading the file: {e}")
     else:
         st.info("Please upload a CSV file to continue.")
     
