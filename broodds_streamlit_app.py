@@ -40,6 +40,9 @@ if __name__ == "__main__":
 
     if selected == 'Big Picture':
         big_picture(scores_and_fixtures_df, season_stages)
+    
+    if selected == 'Betting':
+        betting()
 
     # You can add more content below the columns
     st.markdown("---")

@@ -13,6 +13,8 @@ from mplsoccer import FontManager
 from PIL import Image
 import os
 
+from itertools import product
+
 name_mapping = {
     'America' : 'América',
     'Atlas' : 'Atlas',
@@ -415,7 +417,7 @@ def sidebar_layout():
                 menu_title="Hello BroOdder!",
                 options=['Historic Match Results', 'Team Analysis', 'Goals Analysis',
                         'Home Team Goals Analysis', 'Away Team Goals Analysis', 
-                        'Season Analysis', 'Big Picture'],
+                        'Season Analysis', 'Big Picture','Betting'],
             )
         return selected
 def historic_match_results(df, home_team, away_team, over_line, season_stages, highlight_cells):
@@ -910,6 +912,90 @@ def big_picture(df, season_stages):
 
     st.dataframe(data)
 
+def multiple_simultaneous_expectation_log_wealth(bets_data, fs):
+    assert len(bets_data) == len(fs)
+    
+    res = 0.0
+    grad = np.zeros(len(bets_data))
+    
+    for indices in product(*[[0, 1] for _ in range(len(bets_data))]):
+        prob = 1.0
+        wealth = 1.0
+        local_grad = np.zeros(len(bets_data))
+        
+        for i, j in enumerate(indices):
+            if j == 0:
+                prob *= bets_data[i][0]
+                wealth += fs[i] * bets_data[i][1]
+                local_grad[i] += bets_data[i][1]
+            else:
+                prob *= 1.0 - bets_data[i][0]
+                wealth -= fs[i]
+                local_grad[i] -= 1.0
+        
+        if wealth > 0.0:
+            res += prob * np.log(wealth)
+            grad += prob * local_grad / wealth
+    
+    return res, grad.tolist()
+
+def clip(x):
+    return min(1.0, max(0.0, x))
+
+def multiple_simultaneous_kelly(bets_data, alpha, max_iter):
+    value_var = 0.0
+    fs_var = np.zeros(len(bets_data)).tolist()
+    
+    for _ in range(max_iter):
+        value, grad = multiple_simultaneous_expectation_log_wealth(bets_data, fs_var)
+        mat = np.array(fs_var) + alpha * np.array(grad)
+        
+        fs_candidate = [clip(x) for x in mat]
+        
+        # Scale weights if total greater than 1
+        total = sum(fs_candidate)
+        if total > 1.0:
+            fs_candidate = [x / total for x in fs_candidate]
+        
+        # Stop if no improvement in expectation
+        value_candidate, _ = multiple_simultaneous_expectation_log_wealth(bets_data, fs_candidate)
+        
+        if value_candidate <= value:
+            break
+        else:
+            fs_var = fs_candidate
+            value_var = value_candidate
+    
+    return value_var, fs_var
+
+# bets_data
+def display_bank_percentages(df_betting):
+    total_bank = float(st.text_input("How much bank % will you allocate to this portfolio? Expresse it as a number between [0,1])", 1))
+    expected_portfolio_value, portfolio_weights = multiple_simultaneous_kelly(df_betting, alpha=1, max_iter=int(1e8))
+    df_betting['% de bank'] = portfolio_weights
+    df_betting['% de bank'] *= total_bank
+    df_betting['% de bank'] = df_betting['% de bank'].apply(lambda row: np.round(row, 2))
+    
+    st.dataframe(df_betting)
+
+def betting():
+    st.title("Betting Zone")
+
+    # File uploader
+    uploaded_file = st.file_uploader("Upload your bets in a csv file", type="csv")
+
+    if uploaded_file is not None:
+        try:
+            # Read the CSV file into a DataFrame
+            betting_data = pd.read_csv(uploaded_file)
+            display_bank_percentages(betting_data)
+            
+            # Return the DataFrame for further processing
+        except Exception as e:
+            st.error(f"Error reading the file: {e}")
+    else:
+        st.info("Please upload a CSV file to continue.")
+    
 def read_scores_and_fixtures():
     df = pd.read_csv("data/csvdata/scores_and_fixtures.csv").iloc[:,1:]
     
